@@ -393,6 +393,107 @@ export const issueRouter = router({
       });
     }),
 
+  // T-021: Bulk status update
+  bulkUpdateStatus: requirePermission('update_issue')
+    .input(
+      z.object({
+        issueIds: z.array(z.string()).min(1).max(50),
+        status: z.enum(ISSUE_STATUSES),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updated = await ctx.db.issue.updateMany({
+        where: {
+          id: { in: input.issueIds },
+          project: { company_id: ctx.company.id },
+        },
+        data: {
+          status: input.status,
+          ...(input.status === 'CLOSED' ? { closed_at: new Date() } : {}),
+        },
+      });
+
+      // Log bulk action
+      await ctx.db.activityLog.create({
+        data: {
+          entity_type: 'ISSUE',
+          entity_id: input.issueIds[0],
+          actor_id: ctx.member.id,
+          actor_type: 'MEMBER',
+          action: 'BULK_STATUS_CHANGE',
+          metadata_json: {
+            issue_count: input.issueIds.length,
+            new_status: input.status,
+          } as any,
+        },
+      });
+
+      return { updated: updated.count };
+    }),
+
+  // T-021: Bulk assign
+  bulkAssign: requirePermission('update_issue')
+    .input(
+      z.object({
+        issueIds: z.array(z.string()).min(1).max(50),
+        assigneeId: z.string().nullable(),
+        assigneeType: z.enum(['MEMBER', 'AGENT']).nullable(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const updated = await ctx.db.issue.updateMany({
+        where: {
+          id: { in: input.issueIds },
+          project: { company_id: ctx.company.id },
+        },
+        data: {
+          assignee_id: input.assigneeId,
+          assignee_type: input.assigneeType,
+        },
+      });
+
+      return { updated: updated.count };
+    }),
+
+  // T-021: Issue linking
+  createLink: requirePermission('update_issue')
+    .input(
+      z.object({
+        sourceIssueId: z.string(),
+        targetIssueId: z.string(),
+        linkType: z.enum(['RELATED', 'BLOCKS', 'BLOCKED_BY', 'DUPLICATE']),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      // Verify both issues belong to this company
+      const [source, target] = await Promise.all([
+        ctx.db.issue.findFirst({
+          where: { id: input.sourceIssueId, project: { company_id: ctx.company.id } },
+        }),
+        ctx.db.issue.findFirst({
+          where: { id: input.targetIssueId, project: { company_id: ctx.company.id } },
+        }),
+      ]);
+
+      if (!source || !target) {
+        throw new TRPCError({ code: 'NOT_FOUND', message: 'Issue not found' });
+      }
+
+      return ctx.db.issueLink.create({
+        data: {
+          source_issue_id: input.sourceIssueId,
+          target_issue_id: input.targetIssueId,
+          link_type: input.linkType,
+        },
+      });
+    }),
+
+  removeLink: requirePermission('update_issue')
+    .input(z.object({ linkId: z.string() }))
+    .mutation(async ({ ctx, input }) => {
+      return ctx.db.issueLink.delete({ where: { id: input.linkId } });
+    }),
+
   // Get issue counts by status for a project (used by board view)
   statusCounts: companyProcedure
     .input(z.object({ projectId: z.string() }))
