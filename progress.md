@@ -18,6 +18,10 @@
 - `protectedProcedure` in `apps/web/src/server/trpc.ts` enforces auth — provides `ctx.user` and `ctx.session`
 - Zod schemas from `@nobug/shared` — never duplicate validation between web app and extension
 - WXT extension requires `srcDir: 'src'` in wxt.config.ts when using `src/entrypoints/` directory structure
+- API keys use `nb_key_` prefix + SHA-256 hash storage; `validateApiKey()` in `api-key.ts` for REST/MCP auth
+- `requirePermission('perm')` factory in trpc.ts chains off companyProcedure — use for write operations
+- `agent.listAssignable` returns unified members + agents list for assignment dropdowns — use this everywhere assignments are needed
+- Soft delete pattern: set `settings_json.archived = true` instead of hard delete (projects, etc.)
 
 <!-- Example entries to be added during execution:
 - Use `@bugdetector/shared` for all Zod schemas — never duplicate validation logic
@@ -126,6 +130,66 @@
 - Better Auth stores passwords in Account table, not User table — different from traditional auth
 - The OAuthProvider enum was removed; Better Auth uses string provider_id field
 - Need `Verification` model for email tokens — Better Auth manages this internally
+
+---
+
+## [2026-04-13] — Task T-011: Project CRUD with Settings
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/server/routers/project.ts (created)
+- apps/web/src/server/routers/_app.ts (modified — added projectRouter)
+
+**What Was Implemented:**
+- Project CRUD router: create, getByKey, getById, list (paginated+search), update, delete (soft archive via settings_json), suggestKey
+- Uses requirePermission('manage_projects') for write operations
+- Key uniqueness enforced within company scope (company_id_key compound unique)
+- suggestKey auto-generates from project name initials with collision avoidance
+
+**Learnings:**
+- Prisma compound unique index (`company_id_key`) works well for scoped uniqueness checks
+- Soft delete via settings_json.archived avoids cascade issues and allows restore
+
+---
+
+## [2026-04-13] — Task T-012: API Key Generation and Validation
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/server/routers/api-key.ts (created)
+- apps/web/src/server/routers/_app.ts (modified — added apiKeyRouter)
+
+**What Was Implemented:**
+- API key generation with `nb_key_` prefix + 24 random bytes (hex)
+- SHA-256 hash stored in DB — raw key shown once at creation, never retrievable
+- List active keys (never exposing hash), revoke (soft delete via revoked_at)
+- `validateApiKey()` utility exported for REST API and MCP endpoint authentication
+- Updates `last_used_at` on each validation (fire-and-forget)
+- Scoped permissions: read/write, per-project or company-wide
+
+**Learnings:**
+- API key prefix changed from `bd_key_` to `nb_key_` to match NoBug branding
+- validateApiKey is exported as a standalone utility (not a tRPC middleware) so it can be used by non-tRPC routes (REST, MCP SSE endpoint)
+
+---
+
+## [2026-04-13] — Task T-013: AI Agent Model CRUD
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/server/routers/agent.ts (created)
+- apps/web/src/server/routers/_app.ts (modified — added agentRouter)
+
+**What Was Implemented:**
+- Agent CRUD: create, getById, list (filterable by status/type), update, disable/enable
+- `listAssignable` endpoint: returns both human members AND active agents in a unified format for assignment dropdowns
+- Agent task queue: `listTasks` with agent/status filters
+- Polymorphic assignee pattern: members have type 'MEMBER', agents have type 'AGENT'
+- Config schema validated per agent type (model, repo_url, target_url, capabilities)
+
+**Learnings:**
+- `listAssignable` is the key endpoint for the UI — it provides a unified list for assignment dropdowns with visual separation between members and agents
+- Agent task counts use Prisma `_count` with filtered relations for queue status
 
 ---
 

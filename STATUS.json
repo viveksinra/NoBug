@@ -1,11 +1,11 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-13T00:15:00Z",
-  "last_task_completed": "T-010",
+  "last_updated": "2026-04-13T12:30:00Z",
+  "last_task_completed": "T-013",
   "total_tasks": 55,
-  "completed": 8,
-  "in_progress": "T-011",
+  "completed": 11,
+  "in_progress": null,
   "blocked": [],
   "tasks": [
     {
@@ -132,37 +132,37 @@
       "id": "T-011",
       "phase": "1A",
       "title": "Project CRUD with Settings",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-13T00:15:00Z",
+      "completed_at": "2026-04-13T12:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-010"],
-      "notes": ""
+      "notes": "Project CRUD router with create, getByKey, getById, list (paginated+search), update, delete (soft via settings_json.archived), suggestKey. Uses requirePermission('manage_projects') for write ops."
     },
     {
       "id": "T-012",
       "phase": "1A",
       "title": "API Key Generation and Validation",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-13T12:00:00Z",
+      "completed_at": "2026-04-13T12:15:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-011"],
-      "notes": ""
+      "notes": "API key router: generate (nb_key_ prefix + SHA-256 hash), list, revoke. validateApiKey utility exported for REST/MCP use. Key shown once at creation."
     },
     {
       "id": "T-013",
       "phase": "1A",
       "title": "AI Agent Model CRUD",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-13T12:15:00Z",
+      "completed_at": "2026-04-13T12:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-010"],
-      "notes": ""
+      "notes": "Agent router: create, getById, list (with status/type filter), listAssignable (returns both members AND agents for assignment dropdowns), update, listTasks (agent task queue). Polymorphic MEMBER|AGENT pattern used."
     },
     {
       "id": "T-014",
