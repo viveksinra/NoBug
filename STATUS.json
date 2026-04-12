@@ -1,11 +1,11 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-12T19:45:00Z",
-  "last_task_completed": "T-006",
+  "last_updated": "2026-04-13T00:15:00Z",
+  "last_task_completed": "T-010",
   "total_tasks": 55,
-  "completed": 6,
-  "in_progress": null,
+  "completed": 8,
+  "in_progress": "T-011",
   "blocked": [],
   "tasks": [
     {
@@ -96,13 +96,13 @@
       "id": "T-008",
       "phase": "1A",
       "title": "Company CRUD and Multi-Company Membership",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-12T19:45:00Z",
+      "completed_at": "2026-04-13T00:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-006"],
-      "notes": ""
+      "notes": "Company tRPC router with create/getBySlug/getById/list/update/suggestSlug. Owner auto-created on company creation. Member validation on access."
     },
     {
       "id": "T-009",
@@ -120,13 +120,13 @@
       "id": "T-010",
       "phase": "1A",
       "title": "RBAC Middleware and Permission Checks",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-13T00:00:00Z",
+      "completed_at": "2026-04-13T00:15:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-008"],
-      "notes": ""
+      "notes": "companyProcedure validates membership + provides role context. requirePermission() factory enforces per-permission checks using shared hasPermission()."
     },
     {
       "id": "T-011",
