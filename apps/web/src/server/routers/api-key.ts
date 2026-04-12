@@ -40,6 +40,7 @@ export const apiKeyRouter = router({
       }
 
       const { raw, hash } = generateApiKey();
+      const prefix = raw.slice(0, 12) + '...';
 
       const apiKey = await ctx.db.apiKey.create({
         data: {
@@ -47,7 +48,8 @@ export const apiKeyRouter = router({
           project_id: input.projectId,
           name: input.name,
           key_hash: hash,
-          permissions: input.permissions,
+          prefix,
+          permissions: input.permissions as any,
         },
       });
 
@@ -64,18 +66,16 @@ export const apiKeyRouter = router({
 
   list: requirePermission('manage_api_keys')
     .input(
-      z
-        .object({
-          projectId: z.string().nullable().optional(),
-        })
-        .optional(),
+      z.object({
+        projectId: z.string().nullable().optional(),
+      }),
     )
     .query(async ({ ctx, input }) => {
       return ctx.db.apiKey.findMany({
         where: {
           company_id: ctx.company.id,
           revoked_at: null,
-          ...(input?.projectId ? { project_id: input.projectId } : {}),
+          ...(input.projectId ? { project_id: input.projectId } : {}),
         },
         select: {
           id: true,

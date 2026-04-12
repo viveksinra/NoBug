@@ -41,7 +41,7 @@ export const agentRouter = router({
       const agent = await ctx.db.agent.findFirst({
         where: { id: input.agentId, company_id: ctx.company.id },
         include: {
-          _count: { select: { agent_tasks: true } },
+          _count: { select: { tasks: true } },
         },
       });
 
@@ -54,24 +54,22 @@ export const agentRouter = router({
 
   list: companyProcedure
     .input(
-      z
-        .object({
-          status: z.enum(AGENT_STATUSES).optional(),
-          type: z.enum(AGENT_TYPES).optional(),
-        })
-        .optional(),
+      z.object({
+        status: z.enum(AGENT_STATUSES).optional(),
+        type: z.enum(AGENT_TYPES).optional(),
+      }),
     )
     .query(async ({ ctx, input }) => {
       return ctx.db.agent.findMany({
         where: {
           company_id: ctx.company.id,
-          ...(input?.status ? { status: input.status } : {}),
-          ...(input?.type ? { type: input.type } : {}),
+          ...(input.status ? { status: input.status } : {}),
+          ...(input.type ? { type: input.type } : {}),
         },
         include: {
           _count: {
             select: {
-              agent_tasks: { where: { status: 'QUEUED' } },
+              tasks: true,
             },
           },
         },
@@ -84,7 +82,7 @@ export const agentRouter = router({
     const [members, agents] = await Promise.all([
       ctx.db.member.findMany({
         where: { company_id: ctx.company.id },
-        include: { user: { select: { id: true, name: true, email: true, image: true } } },
+        include: { user: { select: { id: true, name: true, email: true, avatar_url: true } } },
       }),
       ctx.db.agent.findMany({
         where: { company_id: ctx.company.id, status: 'ACTIVE' },
@@ -98,7 +96,7 @@ export const agentRouter = router({
         type: 'MEMBER' as const,
         name: m.user.name ?? m.user.email,
         email: m.user.email,
-        avatar: m.user.image,
+        avatar: m.user.avatar_url,
         role: m.role,
       })),
       agents: agents.map((a) => ({
@@ -134,33 +132,38 @@ export const agentRouter = router({
 
       return ctx.db.agent.update({
         where: { id: input.agentId },
-        data: input.data,
+        data: {
+          ...(input.data.name !== undefined && { name: input.data.name }),
+          ...(input.data.status !== undefined && { status: input.data.status }),
+          ...(input.data.avatar_url !== undefined && { avatar_url: input.data.avatar_url }),
+          ...(input.data.config_json !== undefined && {
+            config_json: input.data.config_json as any,
+          }),
+        },
       });
     }),
 
   // Agent task queue
   listTasks: companyProcedure
     .input(
-      z
-        .object({
-          agentId: z.string().optional(),
-          status: z.enum(['QUEUED', 'RUNNING', 'COMPLETED', 'FAILED']).optional(),
-          limit: z.number().min(1).max(100).default(20),
-        })
-        .optional(),
+      z.object({
+        agentId: z.string().optional(),
+        status: z.enum(['QUEUED', 'RUNNING', 'COMPLETED', 'FAILED']).optional(),
+        limit: z.number().min(1).max(100).default(20),
+      }),
     )
     .query(async ({ ctx, input }) => {
       return ctx.db.agentTask.findMany({
         where: {
           company_id: ctx.company.id,
-          ...(input?.agentId ? { agent_id: input.agentId } : {}),
-          ...(input?.status ? { status: input.status } : {}),
+          ...(input.agentId ? { agent_id: input.agentId } : {}),
+          ...(input.status ? { status: input.status } : {}),
         },
         include: {
           agent: { select: { name: true, type: true } },
         },
         orderBy: { created_at: 'desc' },
-        take: input?.limit ?? 20,
+        take: input.limit,
       });
     }),
 });

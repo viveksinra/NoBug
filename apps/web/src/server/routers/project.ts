@@ -151,7 +151,13 @@ export const projectRouter = router({
 
       return ctx.db.project.update({
         where: { id: input.projectId },
-        data: input.data,
+        data: {
+          ...(input.data.name !== undefined && { name: input.data.name }),
+          ...(input.data.description !== undefined && { description: input.data.description }),
+          ...(input.data.settings_json !== undefined && {
+            settings_json: input.data.settings_json as any,
+          }),
+        },
       });
     }),
 
