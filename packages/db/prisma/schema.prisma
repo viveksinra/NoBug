@@ -15,11 +15,6 @@ datasource db {
 // ENUMS
 // ============================================================================
 
-enum OAuthProvider {
-  GOOGLE
-  GITHUB
-}
-
 enum Plan {
   FREE
   PRO
@@ -167,22 +162,21 @@ enum SyncStatus {
 // T-002: CORE AUTH & ORGANIZATION MODELS
 // ============================================================================
 
-model User {
-  id                 String    @id @default(cuid())
-  email              String    @unique
-  password_hash      String?
-  name               String?
-  avatar_url         String?
-  email_verified     Boolean   @default(false)
-  email_verify_token String?
-  reset_token        String?
-  reset_token_expires DateTime?
-  created_at         DateTime  @default(now())
-  updated_at         DateTime  @updatedAt
+// Better Auth manages User, Session, Account, and Verification tables.
+// Field mappings are configured in apps/web/src/lib/auth.ts.
 
-  sessions      Session[]
-  oauth_accounts OAuthAccount[]
-  memberships   Member[]
+model User {
+  id             String    @id @default(cuid())
+  email          String    @unique
+  name           String?
+  avatar_url     String?
+  email_verified Boolean   @default(false)
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
+
+  sessions     Session[]
+  accounts     Account[]
+  memberships  Member[]
   invitations_sent Invitation[] @relation("InvitedBy")
   agents_created Agent[]       @relation("AgentCreator")
   notifications  Notification[]
@@ -200,6 +194,7 @@ model Session {
   ip_address String?
   user_agent String?
   created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
@@ -207,19 +202,39 @@ model Session {
   @@map("sessions")
 }
 
-model OAuthAccount {
-  id                  String        @id @default(cuid())
-  user_id             String
-  provider            OAuthProvider
-  provider_account_id String
-  access_token        String?
-  refresh_token       String?
+// Better Auth's "account" table — handles both credential (email/password)
+// and OAuth provider accounts. Password is stored here, not on User.
+model Account {
+  id                     String    @id @default(cuid())
+  user_id                String
+  account_id             String
+  provider_id            String
+  access_token           String?
+  refresh_token          String?
+  access_token_expires_at DateTime?
+  refresh_token_expires_at DateTime?
+  scope                  String?
+  id_token               String?
+  password               String?
+  created_at             DateTime  @default(now())
+  updated_at             DateTime  @updatedAt
 
   user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([provider, provider_account_id])
   @@index([user_id])
-  @@map("oauth_accounts")
+  @@map("accounts")
+}
+
+// Better Auth's verification table — used for email verification, password reset tokens, etc.
+model Verification {
+  id         String   @id @default(cuid())
+  identifier String
+  value      String
+  expires_at DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@map("verifications")
 }
 
 model Company {

@@ -1,11 +1,11 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-12T19:15:00Z",
-  "last_task_completed": "T-005",
+  "last_updated": "2026-04-12T19:45:00Z",
+  "last_task_completed": "T-006",
   "total_tasks": 55,
-  "completed": 5,
-  "in_progress": "T-006",
+  "completed": 6,
+  "in_progress": null,
   "blocked": [],
   "tasks": [
     {
@@ -72,13 +72,13 @@
       "id": "T-006",
       "phase": "1A",
       "title": "Better Auth Setup -- Registration and Login",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-12T19:15:00Z",
+      "completed_at": "2026-04-12T19:45:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-002", "T-005"],
-      "notes": ""
+      "notes": "Better Auth with Prisma adapter, email/password auth, email verification, session middleware, tRPC context with auth, API routes. Schema updated to Better Auth conventions (Account table holds password, Verification table added)."
     },
     {
       "id": "T-007",
