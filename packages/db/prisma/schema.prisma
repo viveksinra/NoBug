@@ -1,0 +1,712 @@
+// NoBug — Prisma Schema
+// Full V1 data model covering auth, organizations, issues, recordings,
+// regression testing, integrations, and AI agent support.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================================================
+// ENUMS
+// ============================================================================
+
+enum OAuthProvider {
+  GOOGLE
+  GITHUB
+}
+
+enum Plan {
+  FREE
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  DEVELOPER
+  QA
+  VIEWER
+}
+
+enum IssueStatus {
+  OPEN
+  IN_PROGRESS
+  DEV_TESTING
+  QA_TESTING
+  CLOSED
+  REOPENED
+}
+
+enum Priority {
+  CRITICAL
+  HIGH
+  MEDIUM
+  LOW
+  NONE
+}
+
+enum IssueType {
+  BUG
+  FEATURE
+  TASK
+}
+
+// Polymorphic actor/assignee type used across Issues, Comments, ActivityLog, etc.
+enum ActorType {
+  MEMBER
+  AGENT
+  SYSTEM
+}
+
+enum CommentType {
+  COMMENT
+  STATUS_CHANGE
+  ASSIGNMENT
+  RECORDING_ATTACHED
+  AI_ANALYSIS
+}
+
+enum LinkType {
+  RELATED
+  BLOCKS
+  BLOCKED_BY
+  DUPLICATE
+}
+
+enum RecordingType {
+  RRWEB
+  VIDEO
+  DEV_TEST
+  QA_TEST
+  AI_TEST
+}
+
+enum AgentType {
+  QA_TESTER
+  DEVELOPER
+  CODE_REVIEWER
+  REGRESSION_RUNNER
+}
+
+enum AgentStatus {
+  ACTIVE
+  PAUSED
+  DISABLED
+}
+
+enum AgentTaskType {
+  BUG_ANALYSIS
+  CODE_REVIEW
+  REGRESSION_TEST
+  QA_TEST
+  SUMMARIZE
+}
+
+enum AgentTaskStatus {
+  QUEUED
+  RUNNING
+  COMPLETED
+  FAILED
+}
+
+enum RegressionTier {
+  SMOKE
+  CORE
+  FULL
+}
+
+enum RunTrigger {
+  MANUAL
+  DEPLOY_WEBHOOK
+  SCHEDULED
+}
+
+enum ExecutorType {
+  HUMAN
+  AI_AGENT
+  MIXED
+}
+
+enum RunStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+}
+
+enum TestResultValue {
+  PASS
+  FAIL
+  BLOCKED
+  SKIPPED
+}
+
+enum IntegrationProvider {
+  GITHUB
+  JIRA
+  AZURE_DEVOPS
+  LINEAR
+  SLACK
+  GITLAB
+  WEBHOOK
+}
+
+enum SyncStatus {
+  SYNCED
+  PENDING
+  ERROR
+}
+
+// ============================================================================
+// T-002: CORE AUTH & ORGANIZATION MODELS
+// ============================================================================
+
+model User {
+  id                 String    @id @default(cuid())
+  email              String    @unique
+  password_hash      String?
+  name               String?
+  avatar_url         String?
+  email_verified     Boolean   @default(false)
+  email_verify_token String?
+  reset_token        String?
+  reset_token_expires DateTime?
+  created_at         DateTime  @default(now())
+  updated_at         DateTime  @updatedAt
+
+  sessions      Session[]
+  oauth_accounts OAuthAccount[]
+  memberships   Member[]
+  invitations_sent Invitation[] @relation("InvitedBy")
+  agents_created Agent[]       @relation("AgentCreator")
+  notifications  Notification[]
+  quick_captures QuickCapture[]
+  integrations_created Integration[] @relation("IntegrationCreator")
+
+  @@map("users")
+}
+
+model Session {
+  id         String   @id @default(cuid())
+  user_id    String
+  token      String   @unique
+  expires_at DateTime
+  ip_address String?
+  user_agent String?
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@map("sessions")
+}
+
+model OAuthAccount {
+  id                  String        @id @default(cuid())
+  user_id             String
+  provider            OAuthProvider
+  provider_account_id String
+  access_token        String?
+  refresh_token       String?
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([provider, provider_account_id])
+  @@index([user_id])
+  @@map("oauth_accounts")
+}
+
+model Company {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  logo_url   String?
+  plan       Plan     @default(FREE)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  members      Member[]
+  invitations  Invitation[]
+  projects     Project[]
+  api_keys     ApiKey[]
+  agents       Agent[]
+  agent_tasks  AgentTask[]
+  integrations Integration[]
+
+  @@map("companies")
+}
+
+model Member {
+  id         String   @id @default(cuid())
+  company_id String
+  user_id    String
+  role       Role     @default(DEVELOPER)
+  invited_at DateTime @default(now())
+  joined_at  DateTime?
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([company_id, user_id])
+  @@index([user_id])
+  @@map("members")
+}
+
+model Invitation {
+  id          String    @id @default(cuid())
+  company_id  String
+  email       String
+  role        Role      @default(DEVELOPER)
+  token       String    @unique
+  invited_by  String
+  expires_at  DateTime
+  accepted_at DateTime?
+  created_at  DateTime  @default(now())
+
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  inviter User    @relation("InvitedBy", fields: [invited_by], references: [id])
+
+  @@index([company_id])
+  @@map("invitations")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  company_id  String
+  project_id  String?   // Nullable: some keys are company-wide
+  name        String
+  key_hash    String    @unique
+  prefix      String    // First 8 chars of key for display (e.g., "nb_live_a1b2...")
+  permissions Json      @default("{}")
+  last_used_at DateTime?
+  created_at  DateTime  @default(now())
+  revoked_at  DateTime?
+
+  company Company  @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  project Project? @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  agent   Agent?
+
+  @@index([company_id])
+  @@map("api_keys")
+}
+
+// ============================================================================
+// T-003: PROJECT, ISSUE, AND SUPPORTING MODELS
+// ============================================================================
+
+model Project {
+  id            String   @id @default(cuid())
+  company_id    String
+  name          String
+  key           String   // Unique within company (e.g., "WEB", "API")
+  description   String?
+  settings_json Json     @default("{}")
+  created_at    DateTime @default(now())
+  updated_at    DateTime @updatedAt
+
+  company           Company            @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  issues            Issue[]
+  labels            Label[]
+  api_keys          ApiKey[]
+  agents            Agent[]            @relation("ProjectAgents")
+  regression_suites RegressionSuite[]
+  integrations      Integration[]
+
+  @@unique([company_id, key])
+  @@index([company_id])
+  @@map("projects")
+}
+
+model Issue {
+  id              String      @id @default(cuid())
+  project_id      String
+  number          Int         // Auto-increment per project (managed by application logic)
+  title           String
+  description     String?     @db.Text
+  status          IssueStatus @default(OPEN)
+  priority        Priority    @default(MEDIUM)
+  type            IssueType   @default(BUG)
+  // Polymorphic reporter: reporter_type + reporter_id
+  reporter_id     String
+  reporter_type   ActorType   @default(MEMBER)
+  // Polymorphic assignee: assignee_type + assignee_id (nullable = unassigned)
+  assignee_id     String?
+  assignee_type   ActorType?
+  environment_json Json?
+  ai_summary      String?     @db.Text
+  ai_root_cause   String?     @db.Text
+  created_at      DateTime    @default(now())
+  updated_at      DateTime    @updatedAt
+  closed_at       DateTime?
+
+  project     Project        @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  comments    IssueComment[]
+  labels      IssueLabel[]
+  source_links IssueLink[]   @relation("SourceIssue")
+  target_links IssueLink[]   @relation("TargetIssue")
+  recordings  Recording[]
+  screenshots Screenshot[]
+  quick_captures QuickCapture[] @relation("ConvertedIssue")
+  external_refs ExternalRef[]
+  test_case_bug_links TestCaseBugLink[]
+
+  @@unique([project_id, number])
+  @@index([project_id, status])
+  @@index([project_id, assignee_id])
+  @@index([project_id, priority])
+  @@map("issues")
+}
+
+model IssueComment {
+  id          String      @id @default(cuid())
+  issue_id    String
+  author_id   String
+  author_type ActorType   @default(MEMBER)
+  content     String      @db.Text
+  type        CommentType @default(COMMENT)
+  created_at  DateTime    @default(now())
+
+  issue Issue @relation(fields: [issue_id], references: [id], onDelete: Cascade)
+
+  @@index([issue_id])
+  @@map("issue_comments")
+}
+
+model Label {
+  id         String @id @default(cuid())
+  project_id String
+  name       String
+  color      String @default("#6366f1")
+
+  project Project      @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  issues  IssueLabel[]
+
+  @@unique([project_id, name])
+  @@map("labels")
+}
+
+model IssueLabel {
+  issue_id String
+  label_id String
+
+  issue Issue @relation(fields: [issue_id], references: [id], onDelete: Cascade)
+  label Label @relation(fields: [label_id], references: [id], onDelete: Cascade)
+
+  @@id([issue_id, label_id])
+  @@map("issue_labels")
+}
+
+model IssueLink {
+  id              String   @id @default(cuid())
+  source_issue_id String
+  target_issue_id String
+  link_type       LinkType
+
+  source_issue Issue @relation("SourceIssue", fields: [source_issue_id], references: [id], onDelete: Cascade)
+  target_issue Issue @relation("TargetIssue", fields: [target_issue_id], references: [id], onDelete: Cascade)
+
+  @@unique([source_issue_id, target_issue_id, link_type])
+  @@map("issue_links")
+}
+
+model Recording {
+  id               String        @id @default(cuid())
+  issue_id         String?
+  uploader_id      String
+  uploader_type    ActorType     @default(MEMBER)
+  type             RecordingType @default(RRWEB)
+  storage_url      String
+  duration_ms      Int?
+  console_logs_url String?       // S3 URL — stored as compressed file, NOT inline JSONB
+  network_logs_url String?       // S3 URL — stored as compressed file, NOT inline JSONB
+  environment_json Json?
+  thumbnail_url    String?
+  created_at       DateTime      @default(now())
+
+  issue        Issue?       @relation(fields: [issue_id], references: [id], onDelete: SetNull)
+  test_results TestResult[] @relation("RecordingResult")
+
+  @@index([issue_id])
+  @@map("recordings")
+}
+
+model Screenshot {
+  id               String   @id @default(cuid())
+  issue_id         String?
+  uploader_id      String
+  original_url     String
+  annotated_url    String?
+  annotations_json Json?
+  created_at       DateTime @default(now())
+
+  issue        Issue?       @relation(fields: [issue_id], references: [id], onDelete: SetNull)
+  test_results TestResult[] @relation("ScreenshotResult")
+
+  @@index([issue_id])
+  @@map("screenshots")
+}
+
+model QuickCapture {
+  id                   String    @id @default(cuid())
+  slug                 String    @unique
+  user_id              String?   // Nullable: anonymous captures allowed
+  title                String?
+  description          String?   @db.Text
+  recording_url        String?
+  console_logs_url     String?
+  network_logs_url     String?
+  screenshot_url       String?
+  environment_json     Json?
+  password_hash        String?
+  expires_at           DateTime?
+  view_count           Int       @default(0)
+  converted_to_issue_id String?
+  created_at           DateTime  @default(now())
+
+  user             User?   @relation(fields: [user_id], references: [id], onDelete: SetNull)
+  converted_issue  Issue?  @relation("ConvertedIssue", fields: [converted_to_issue_id], references: [id], onDelete: SetNull)
+
+  @@index([slug])
+  @@map("quick_captures")
+}
+
+model Agent {
+  id          String      @id @default(cuid())
+  company_id  String
+  name        String
+  type        AgentType
+  status      AgentStatus @default(ACTIVE)
+  avatar_url  String?
+  config_json Json        @default("{}")
+  api_key_id  String?     @unique
+  created_by  String
+  created_at  DateTime    @default(now())
+  updated_at  DateTime    @updatedAt
+
+  company  Company    @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  api_key  ApiKey?    @relation(fields: [api_key_id], references: [id], onDelete: SetNull)
+  creator  User       @relation("AgentCreator", fields: [created_by], references: [id])
+  tasks    AgentTask[]
+  projects Project[]  @relation("ProjectAgents")
+
+  @@index([company_id])
+  @@map("agents")
+}
+
+model AgentTask {
+  id          String          @id @default(cuid())
+  agent_id    String
+  company_id  String
+  task_type   AgentTaskType
+  entity_type String
+  entity_id   String
+  status      AgentTaskStatus @default(QUEUED)
+  result_json Json?
+  started_at  DateTime?
+  completed_at DateTime?
+  created_at  DateTime        @default(now())
+
+  agent   Agent   @relation(fields: [agent_id], references: [id], onDelete: Cascade)
+  company Company @relation(fields: [company_id], references: [id], onDelete: Cascade)
+
+  @@index([agent_id, status])
+  @@index([company_id])
+  @@map("agent_tasks")
+}
+
+model ActivityLog {
+  id            String    @id @default(cuid())
+  entity_type   String
+  entity_id     String
+  actor_id      String
+  actor_type    ActorType @default(MEMBER)
+  action        String
+  metadata_json Json?
+  created_at    DateTime  @default(now())
+
+  @@index([entity_type, entity_id])
+  @@index([actor_id])
+  @@map("activity_logs")
+}
+
+model Notification {
+  id          String   @id @default(cuid())
+  user_id     String
+  type        String
+  title       String
+  body        String?  @db.Text
+  read        Boolean  @default(false)
+  entity_type String?
+  entity_id   String?
+  created_at  DateTime @default(now())
+
+  user User @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id, read])
+  @@index([user_id, created_at])
+  @@map("notifications")
+}
+
+// ============================================================================
+// T-004: REGRESSION TESTING & INTEGRATION MODELS
+// ============================================================================
+
+model RegressionSuite {
+  id          String   @id @default(cuid())
+  project_id  String
+  name        String
+  description String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  project    Project          @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  test_cases TestCase[]
+  runs       RegressionRun[]
+
+  @@index([project_id])
+  @@map("regression_suites")
+}
+
+model TestCase {
+  id                String        @id @default(cuid())
+  suite_id          String
+  title             String
+  description       String?       @db.Text
+  steps_json        Json          @default("[]")
+  expected_result   String?       @db.Text
+  tier              RegressionTier @default(CORE)
+  priority          Priority      @default(MEDIUM)
+  tags              String[]      @default([])
+  folder            String?
+  automated         Boolean       @default(false)
+  playwright_script String?       @db.Text
+  flaky_score       Float         @default(0)
+  created_at        DateTime      @default(now())
+  updated_at        DateTime      @updatedAt
+
+  suite       RegressionSuite      @relation(fields: [suite_id], references: [id], onDelete: Cascade)
+  bug_links   TestCaseBugLink[]
+  assignments TestCaseAssignment[]
+  results     TestResult[]
+
+  @@index([suite_id, tier])
+  @@map("test_cases")
+}
+
+model TestCaseBugLink {
+  id            String @id @default(cuid())
+  test_case_id  String
+  issue_id      String
+  found_in_run_id String
+
+  test_case TestCase      @relation(fields: [test_case_id], references: [id], onDelete: Cascade)
+  issue     Issue         @relation(fields: [issue_id], references: [id], onDelete: Cascade)
+  run       RegressionRun @relation(fields: [found_in_run_id], references: [id], onDelete: Cascade)
+
+  @@index([test_case_id])
+  @@index([issue_id])
+  @@map("test_case_bug_links")
+}
+
+model RegressionRun {
+  id              String       @id @default(cuid())
+  suite_id        String
+  release_version String?
+  tier_filter     RegressionTier
+  trigger         RunTrigger   @default(MANUAL)
+  executor_type   ExecutorType @default(HUMAN)
+  status          RunStatus    @default(PENDING)
+  started_at      DateTime?
+  completed_at    DateTime?
+  // stats_json structure: { total, passed, failed, blocked, skipped, pass_rate }
+  stats_json      Json         @default("{}")
+  created_at      DateTime     @default(now())
+
+  suite     RegressionSuite  @relation(fields: [suite_id], references: [id], onDelete: Cascade)
+  results   TestResult[]
+  bug_links TestCaseBugLink[]
+
+  @@index([suite_id])
+  @@map("regression_runs")
+}
+
+model TestCaseAssignment {
+  id            String    @id @default(cuid())
+  test_case_id  String
+  assignee_id   String
+  assignee_type ActorType @default(MEMBER)
+
+  test_case TestCase @relation(fields: [test_case_id], references: [id], onDelete: Cascade)
+
+  @@index([test_case_id])
+  @@map("test_case_assignments")
+}
+
+model TestResult {
+  id                  String          @id @default(cuid())
+  run_id              String
+  test_case_id        String
+  tester_id           String
+  tester_type         ActorType       @default(MEMBER)
+  result              TestResultValue
+  recording_id        String?
+  screenshot_id       String?
+  notes               String?         @db.Text
+  ai_failure_analysis String?         @db.Text
+  execution_log_url   String?
+  tested_at           DateTime        @default(now())
+
+  run        RegressionRun @relation(fields: [run_id], references: [id], onDelete: Cascade)
+  test_case  TestCase      @relation(fields: [test_case_id], references: [id], onDelete: Cascade)
+  recording  Recording?    @relation("RecordingResult", fields: [recording_id], references: [id], onDelete: SetNull)
+  screenshot Screenshot?   @relation("ScreenshotResult", fields: [screenshot_id], references: [id], onDelete: SetNull)
+
+  @@index([run_id])
+  @@index([test_case_id])
+  @@map("test_results")
+}
+
+model Integration {
+  id           String              @id @default(cuid())
+  company_id   String
+  project_id   String?
+  provider     IntegrationProvider
+  config_json  Json                @default("{}")
+  // auth_json contains OAuth tokens and secrets — MUST be encrypted at application level
+  auth_json    Json                @default("{}")
+  sync_enabled Boolean             @default(true)
+  created_by   String
+  created_at   DateTime            @default(now())
+  updated_at   DateTime            @updatedAt
+
+  company       Company       @relation(fields: [company_id], references: [id], onDelete: Cascade)
+  project       Project?      @relation(fields: [project_id], references: [id], onDelete: SetNull)
+  creator       User          @relation("IntegrationCreator", fields: [created_by], references: [id])
+  external_refs ExternalRef[]
+
+  @@index([company_id])
+  @@map("integrations")
+}
+
+model ExternalRef {
+  id             String     @id @default(cuid())
+  issue_id       String
+  integration_id String
+  external_id    String
+  external_url   String?
+  last_synced_at DateTime?
+  sync_status    SyncStatus @default(PENDING)
+
+  issue       Issue       @relation(fields: [issue_id], references: [id], onDelete: Cascade)
+  integration Integration @relation(fields: [integration_id], references: [id], onDelete: Cascade)
+
+  @@unique([integration_id, external_id])
+  @@index([issue_id])
+  @@map("external_refs")
+}

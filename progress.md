@@ -24,6 +24,29 @@ _(No patterns discovered yet — will be populated during execution)_
 
 ## Iteration Log
 
+## [2026-04-12] — Task T-001: Turborepo Monorepo Scaffolding
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/wxt.config.ts (modified — added srcDir: 'src')
+- eslint.config.mjs (created — root ESLint with typescript-eslint)
+- turbo.json (modified — added .output to build outputs)
+- apps/extension/package.json (modified — added @wxt-dev/module-react)
+
+**What Was Implemented:**
+- Fixed missing @wxt-dev/module-react dependency in extension
+- Added srcDir configuration to WXT so it finds entrypoints in src/
+- Added root ESLint config with typescript-eslint recommended rules
+- Added .output/** to turbo build outputs for WXT extension
+- Verified `pnpm turbo build` succeeds across all 6 workspaces
+
+**Learnings:**
+- Package scope is @nobug/ (not @bugdetector/ as CLAUDE.md suggests) — follow existing convention
+- WXT requires `srcDir: 'src'` when entrypoints are under src/entrypoints/
+- WXT outputs to .output/ directory, needs to be in turbo.json outputs
+
+---
+
 <!-- Each iteration adds an entry below. Format:
 
 ## [Date] — Task T-XXX: [Title]
