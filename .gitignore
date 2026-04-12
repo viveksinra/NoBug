@@ -1,0 +1,42 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.next/
+dist/
+.output/
+.turbo/
+out/
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Prisma
+packages/db/prisma/migrations/**/migration_lock.toml
+
+# Extension builds
+apps/extension/.output/
+
+# Testing
+coverage/
+
+# Misc
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Ralph loop local state (session-specific)
+.claude/ralph-loop.local.md
+.ralph/.claude_session_id

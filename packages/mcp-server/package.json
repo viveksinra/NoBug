@@ -1,0 +1,20 @@
+{
+  "name": "@nobug/mcp-server",
+  "version": "0.1.0",
+  "description": "NoBug MCP server — connects AI coding agents to NoBug bug tracking",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "nobug-mcp": "./dist/index.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nobug/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.8.3"
+  }
+}

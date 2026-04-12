@@ -1,0 +1,22 @@
+{
+  "name": "@nobug/extension",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "wxt",
+    "build": "wxt build",
+    "build:firefox": "wxt build --browser firefox",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@nobug/shared": "workspace:*",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
+    "typescript": "^5.8.3",
+    "wxt": "^0.20.20"
+  }
+}
