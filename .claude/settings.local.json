@@ -9,7 +9,11 @@
       "mcp__*",
       "Agent",
       "mcp__plugin_context7_context7__resolve-library-id",
-      "mcp__plugin_context7_context7__query-docs"
+      "mcp__plugin_context7_context7__query-docs",
+      "Bash(pnpm --filter @nobug/web add better-auth)",
+      "Bash(pnpm --filter @nobug/web add @trpc/server @trpc/client @trpc/react-query @trpc/next @tanstack/react-query superjson)",
+      "Bash(npx @better-auth/cli generate --config ./src/lib/auth.ts)",
+      "Bash(pnpm --filter @nobug/web add zod)"
     ],
     "defaultMode": "bypassPermissions",
     "skipDangerousModePermissionPrompt": true
