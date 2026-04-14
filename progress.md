@@ -346,3 +346,61 @@
 - Both fetch errors (network failures) and 4xx/5xx responses are flagged as failed
 
 ---
+
+## [2026-04-14] — Task T-027: Screenshot Capture and Fabric.js Annotation
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/package.json (modified — added fabric dependency)
+- apps/extension/src/lib/screenshot.ts (created — ScreenshotResult, AnnotationTool types, captureVisibleTab)
+- apps/extension/src/entrypoints/annotate/index.html (created — annotation page)
+- apps/extension/src/entrypoints/annotate/main.tsx (created — annotation page entry)
+- apps/extension/src/components/AnnotationEditor.tsx (created — Fabric.js editor with 7 tools)
+- apps/extension/src/lib/types.ts (modified — added screenshot message types)
+- apps/extension/src/entrypoints/background.ts (modified — CAPTURE_SCREENSHOT, OPEN_ANNOTATION_EDITOR handlers)
+
+**What Was Implemented:**
+- chrome.tabs.captureVisibleTab() in service worker for viewport PNG capture
+- Fabric.js annotation editor opens in a new tab (annotate.html)
+- 7 tools: select, arrow, rectangle, ellipse, freehand draw, text, blur/redact
+- 7 colors with visual picker
+- Undo/redo via canvas JSON history
+- Keyboard shortcuts: Escape (cancel), Enter (save), Ctrl+Z/Ctrl+Shift+Z (undo/redo)
+- Blur tool: pixelation effect on selected area using canvas pixel manipulation
+- Export: flattened PNG + annotations JSON stored in chrome.storage.local
+
+**Learnings:**
+- Fabric.js v6+ uses `fabric.FabricImage` (not `fabric.Image`) and `canvas.getScenePoint()`
+- Annotation editor as a separate WXT unlisted page (annotate.html) — WXT auto-registers it
+- Screenshot data passed via chrome.storage.local between SW and annotation page
+
+---
+
+## [2026-04-14] — Task T-028: PII Redaction Pipeline
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/src/lib/pii-redaction.ts (created — redactString, redactConsoleLogs, redactNetworkLogs, redactRrwebEvents)
+- apps/extension/src/lib/consent.ts (created — GDPR consent state with storage)
+- apps/extension/src/lib/redaction-config.ts (created — per-category redaction toggle storage)
+- apps/extension/src/components/ConsentDialog.tsx (created — GDPR consent UI)
+- apps/extension/src/entrypoints/popup/main.tsx (modified — consent check before showing main UI)
+- apps/extension/src/entrypoints/content.ts (modified — consent check before starting rrweb)
+- apps/extension/src/entrypoints/background.ts (modified — consent/redaction config message handlers)
+- apps/extension/src/lib/types.ts (modified — added consent/redaction message types)
+
+**What Was Implemented:**
+- PII redaction library using @nobug/shared PII_PATTERNS (email, CC, SSN, phone, auth headers, JWT)
+- Applies to: console logs (message, args, stack), network entries (headers, URL, bodies), rrweb text nodes
+- Per-category toggle config stored in chrome.storage.local
+- Custom regex patterns support for company-specific redaction
+- GDPR consent dialog shown on first popup open — must accept before recording starts
+- Content script checks consent before initializing rrweb recorder
+- Consent state persisted with version tracking for future consent version bumps
+
+**Learnings:**
+- rrweb text node redaction requires deep traversal of snapshot objects, targeting textContent/value/text keys
+- PII_PATTERNS from shared package use global regex flags — must re-create or use replace() which resets lastIndex
+- Consent check in content script uses async main() — WXT supports this in defineContentScript
+
+---

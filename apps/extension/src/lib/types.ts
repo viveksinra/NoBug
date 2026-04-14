@@ -68,4 +68,15 @@ export type ExtensionMessage =
   | { type: 'CLEAR_CONSOLE_LOGS' }
   // Network log messages
   | { type: 'GET_NETWORK_LOGS' }
-  | { type: 'CLEAR_NETWORK_LOGS' };
+  | { type: 'CLEAR_NETWORK_LOGS' }
+  // Screenshot messages
+  | { type: 'CAPTURE_SCREENSHOT' }
+  | { type: 'SCREENSHOT_CAPTURED'; payload: string }
+  | { type: 'OPEN_ANNOTATION_EDITOR' }
+  | { type: 'SCREENSHOT_ANNOTATED' }
+  // Consent & redaction messages
+  | { type: 'GET_CONSENT_STATE' }
+  | { type: 'GIVE_CONSENT' }
+  | { type: 'REVOKE_CONSENT' }
+  | { type: 'GET_REDACTION_CONFIG' }
+  | { type: 'SET_REDACTION_CONFIG'; payload: import('@/lib/pii-redaction').RedactionConfig };

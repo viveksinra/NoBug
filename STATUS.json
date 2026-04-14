@@ -1,10 +1,10 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-14T15:00:00Z",
-  "last_task_completed": "T-026",
+  "last_updated": "2026-04-14T17:00:00Z",
+  "last_task_completed": "T-028",
   "total_tasks": 55,
-  "completed": 26,
+  "completed": 28,
   "in_progress": null,
   "blocked": [],
   "tasks": [
@@ -324,25 +324,25 @@
       "id": "T-027",
       "phase": "1C",
       "title": "Screenshot Capture and Fabric.js Annotation",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-14T15:00:00Z",
+      "completed_at": "2026-04-14T16:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-023"],
-      "notes": ""
+      "notes": "captureVisibleTab in SW, Fabric.js annotation editor (annotate.html) with 7 tools (select/arrow/rect/ellipse/freehand/text/blur), 7 colors, undo/redo, keyboard shortcuts, pixelation blur. Exports flattened PNG + annotations JSON."
     },
     {
       "id": "T-028",
       "phase": "1C",
       "title": "PII Redaction Pipeline",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-14T16:00:00Z",
+      "completed_at": "2026-04-14T17:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-025", "T-026"],
-      "notes": ""
+      "notes": "PII redaction library using @nobug/shared patterns (email, CC, SSN, phone, auth headers, JWT). Applies to console logs, network entries, rrweb text nodes. Configurable per-category toggle. GDPR consent dialog shown on first popup open. Recording blocked until consent given. Consent stored in chrome.storage.local."
     },
     {
       "id": "T-029",

@@ -5,6 +5,7 @@ declare module "wxt/browser" {
   export type PublicPath =
     | ""
     | "/"
+    | "/annotate.html"
     | "/background.js"
     | "/content-scripts/console-capture.js"
     | "/content-scripts/content.js"

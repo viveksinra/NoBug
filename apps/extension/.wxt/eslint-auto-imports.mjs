@@ -1,7 +1,9 @@
 const globals = {
+  "AnnotationEditor": true,
   "AutoMount": true,
   "AutoMountOptions": true,
   "Browser": true,
+  "ConsentDialog": true,
   "ContentScriptAnchoredOptions": true,
   "ContentScriptAppendMode": true,
   "ContentScriptContext": true,

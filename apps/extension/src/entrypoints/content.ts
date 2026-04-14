@@ -5,11 +5,31 @@ import type { ConsoleEntry, ConsolePostMessage } from '@/lib/console-types';
 import { MAX_LOG_ENTRIES } from '@/lib/console-types';
 import type { NetworkEntry, NetworkPostMessage } from '@/lib/network-types';
 import { MAX_NETWORK_ENTRIES } from '@/lib/network-types';
+import { hasConsent } from '@/lib/consent';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
   runAt: 'document_idle',
-  main() {
+  async main() {
+    // Check GDPR consent before starting any recording
+    const consented = await hasConsent();
+    if (!consented) {
+      console.log('[NoBug] No consent given — recording disabled');
+      // Still listen for messages so consent can be checked
+      browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+        if (message.type === 'GET_RECORDING_STATE') {
+          sendResponse({
+            mode: 'stopped' as RecordingMode,
+            isRecording: false,
+            eventCount: 0,
+            memoryUsageMB: 0,
+            isThrottled: false,
+            manualStartTime: null,
+          } satisfies RecordingState);
+        }
+      });
+      return;
+    }
     // =====================================================================
     // rrweb Recording
     // =====================================================================

@@ -6,6 +6,8 @@ import {
   openLoginPage,
   loginWithApiKey,
 } from '@/lib/auth';
+import { getConsentState, giveConsent, revokeConsent } from '@/lib/consent';
+import { getRedactionConfig, setRedactionConfig } from '@/lib/redaction-config';
 import type { ExtensionMessage } from '@/lib/types';
 
 // Recording message types that should be forwarded to the active tab's content script
@@ -98,6 +100,50 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
   if (message.type === 'RECORDING_STATE') {
     const state = message.payload;
     await updateBadge(state.isRecording, state.isThrottled);
+    return { ok: true };
+  }
+
+  // Screenshot messages (handled in SW because captureVisibleTab needs SW context)
+  if (message.type === 'CAPTURE_SCREENSHOT') {
+    try {
+      const dataUrl = await browser.tabs.captureVisibleTab(undefined, {
+        format: 'png',
+        quality: 100,
+      });
+      // Store for the annotation editor to pick up
+      await browser.storage.local.set({ nobug_screenshot: dataUrl });
+      return { dataUrl };
+    } catch (err) {
+      return { error: String(err) };
+    }
+  }
+
+  if (message.type === 'OPEN_ANNOTATION_EDITOR') {
+    const url = browser.runtime.getURL('/annotate.html');
+    await browser.tabs.create({ url });
+    return { ok: true };
+  }
+
+  if (message.type === 'SCREENSHOT_ANNOTATED') {
+    return { ok: true };
+  }
+
+  // Consent & redaction messages
+  if (message.type === 'GET_CONSENT_STATE') {
+    return getConsentState();
+  }
+  if (message.type === 'GIVE_CONSENT') {
+    return giveConsent();
+  }
+  if (message.type === 'REVOKE_CONSENT') {
+    await revokeConsent();
+    return { ok: true };
+  }
+  if (message.type === 'GET_REDACTION_CONFIG') {
+    return getRedactionConfig();
+  }
+  if (message.type === 'SET_REDACTION_CONFIG') {
+    await setRedactionConfig(message.payload);
     return { ok: true };
   }
 
