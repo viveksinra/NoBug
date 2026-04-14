@@ -79,7 +79,11 @@ export const auth = betterAuth({
       updatedAt: 'updated_at',
     },
   },
-  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'],
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    // Browser extensions use chrome-extension:// or moz-extension:// origins
+    ...(process.env.EXTENSION_ORIGIN ? [process.env.EXTENSION_ORIGIN] : []),
+  ],
 });
 
 export type Session = typeof auth.$Infer.Session.session;

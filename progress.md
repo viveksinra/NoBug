@@ -22,6 +22,14 @@
 - `requirePermission('perm')` factory in trpc.ts chains off companyProcedure — use for write operations
 - `agent.listAssignable` returns unified members + agents list for assignment dropdowns — use this everywhere assignments are needed
 - Soft delete pattern: set `settings_json.archived = true` instead of hard delete (projects, etc.)
+- WXT 0.20.20: `defineBackground` is auto-imported (no `wxt/sandbox`); storage API at `wxt/utils/storage`
+- Extension auth uses `@/lib/auth.ts` with `wxt/utils/storage` for persistent state in `chrome.storage.local`
+- Extension ↔ service worker messaging: use `browser.runtime.sendMessage` with typed `ExtensionMessage` union
+- Web app extension endpoint: `/api/extension/me` supports session cookie and API key Bearer auth
+- rrweb content script stores buffer in content script memory (not SW) — SW can sleep in MV3
+- Recording message relay pattern: popup → service worker → content script via `browser.tabs.sendMessage`
+- MAIN world scripts use `world: 'MAIN'` in defineContentScript; relay to ISOLATED via `window.postMessage`
+- Console capture at `document_start`, rrweb at `document_idle` — both share same performance.now() time origin
 
 <!-- Example entries to be added during execution:
 - Use `@bugdetector/shared` for all Zod schemas — never duplicate validation logic
@@ -215,3 +223,126 @@
 
 ---
 -->
+
+## [2026-04-14] — Task T-023: WXT Extension Project Setup and Auth
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/wxt.config.ts (modified — added tabs, scripting, offscreen, host_permissions)
+- apps/extension/postcss.config.mjs (created — Tailwind CSS PostCSS config)
+- apps/extension/src/assets/globals.css (created — Tailwind with dark theme custom properties)
+- apps/extension/src/lib/types.ts (created — AuthState, PopupMode, ExtensionMessage types)
+- apps/extension/src/lib/constants.ts (created — APP_URL, STORAGE_KEYS, API_KEY_PREFIX)
+- apps/extension/src/lib/auth.ts (created — session/API key auth with wxt/utils/storage persistence)
+- apps/extension/src/lib/useAuth.ts (created — React hook for popup auth state management)
+- apps/extension/src/entrypoints/background.ts (created — service worker with message handling)
+- apps/extension/src/entrypoints/popup/main.tsx (rewritten — 3-mode popup with auth)
+- apps/extension/src/components/NotLoggedIn.tsx (created — Quick Capture + sign in + API key fallback)
+- apps/extension/src/components/NoCompany.tsx (created — Quick Capture + create team CTA)
+- apps/extension/src/components/FullMode.tsx (created — full features with settings panel)
+- apps/web/src/app/api/extension/me/route.ts (created — extension auth endpoint)
+- apps/web/src/lib/auth.ts (modified — added EXTENSION_ORIGIN to trustedOrigins)
+
+**What Was Implemented:**
+- MV3 manifest with activeTab, storage, tabs, scripting, offscreen permissions and host_permissions
+- Tailwind CSS setup with PostCSS and dark theme custom properties
+- Auth library using wxt/utils/storage for persistent auth state in chrome.storage.local
+- Two auth methods: session cookie (via web app login) and API key fallback
+- Service worker (background.ts) handles all messaging: auth state, login, logout, company/project selection
+- Tab listener detects web app login completion and refreshes auth automatically
+- Three popup UI modes: not_logged_in (Quick Capture + sign in), no_company (Quick Capture + create team), full (capture bug + settings)
+- Settings panel with company switcher and sign out
+- Web app /api/extension/me endpoint returns user + companies for both session and API key auth
+- Full monorepo build passes (6/6 workspaces)
+
+**Learnings:**
+- WXT 0.20.20 does NOT export `wxt/sandbox` — use auto-imported `defineBackground` directly
+- WXT storage API is at `wxt/utils/storage`, not `wxt/storage`
+- WXT auto-imports defineBackground, defineContentScript etc. — no explicit import needed for these
+- Extension auth flow: open web app login in new tab → detect completion via tabs.onUpdated → refresh session cookie
+- Better Auth trustedOrigins needs the extension's chrome-extension:// origin for cross-origin cookie access
+
+---
+
+## [2026-04-14] — Task T-024: rrweb Rolling Buffer Recording
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/package.json (modified — added rrweb dependency)
+- apps/extension/src/lib/recording.ts (created — RollingBuffer class, RecordingConfig, RecordingState types)
+- apps/extension/src/lib/useRecording.ts (created — React hook for popup recording state)
+- apps/extension/src/lib/types.ts (modified — added recording message types to ExtensionMessage)
+- apps/extension/src/entrypoints/content.ts (created — rrweb content script with rolling buffer)
+- apps/extension/src/entrypoints/background.ts (modified — recording message forwarding, badge indicator)
+- apps/extension/src/components/FullMode.tsx (modified — wired Capture Bug + manual recording)
+
+**What Was Implemented:**
+- RollingBuffer class with configurable time window (30-60s), 50MB memory cap, mutation throttling (>500/s)
+- rrweb content script (isolated world, document_idle) with maskAllInputs, mouse/scroll/input sampling
+- Rolling buffer mode: always recording, "Capture Bug" snapshots the buffer
+- Manual recording mode: explicit start/stop, captures everything in between
+- Service worker forwards recording messages to active tab's content script
+- Badge indicator: green "REC" when recording, yellow "!" when throttled
+- Popup shows recording state (event count, memory usage, throttle status)
+
+**Learnings:**
+- rrweb 2.0.0-alpha.4 has a harmless `worker_threads` externalization warning from Vite — safe to ignore
+- Content script stores buffer in its own memory (not SW), since service worker can sleep in MV3
+- Recording message relay: popup → SW → content script (tabs.sendMessage) for cross-context communication
+
+---
+
+## [2026-04-14] — Task T-025: Console Log Capture (MAIN World)
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/src/lib/console-types.ts (created — ConsoleEntry, LogLevel, ConsolePostMessage types)
+- apps/extension/src/entrypoints/console-capture.content.ts (created — MAIN world console capture)
+- apps/extension/src/entrypoints/content.ts (modified — added console log buffer + GET_CONSOLE_LOGS handler)
+- apps/extension/src/lib/types.ts (modified — added GET_CONSOLE_LOGS, CLEAR_CONSOLE_LOGS messages)
+- apps/extension/src/entrypoints/background.ts (modified — renamed set to CONTENT_SCRIPT_MESSAGES, added console log forwarding)
+
+**What Was Implemented:**
+- MAIN world content script (document_start) monkey-patches console.log/warn/error/info/debug
+- Captures window.onerror (uncaught exceptions) and unhandledrejection events
+- Safe serialization handles: circular references (WeakSet), DOM elements (tag#id.class), Symbols, BigInt, Functions, truncation at 10KB
+- Original console behavior preserved (patched functions still output to DevTools)
+- Relay via window.postMessage(__NOBUG_CONSOLE__) to ISOLATED world content script
+- ISOLATED content script stores 500-entry console log buffer
+- CAPTURE_BUFFER response now includes consoleLogs alongside rrweb events
+- GET_CONSOLE_LOGS / CLEAR_CONSOLE_LOGS message handlers for direct log access
+
+**Learnings:**
+- WXT supports `world: 'MAIN'` in defineContentScript — generates manifest with world field automatically
+- MAIN world scripts can't import WXT/browser APIs — use window.postMessage for relay
+- Console capture must run at document_start to catch early errors; rrweb runs at document_idle
+- performance.now() timestamps in MAIN world share the same time origin as ISOLATED world — aligns with rrweb
+
+---
+
+## [2026-04-14] — Task T-026: Network Request Capture
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/src/lib/network-types.ts (created — NetworkEntry, PII_HEADERS, MAX_BODY_SIZE)
+- apps/extension/src/entrypoints/network-capture.content.ts (created — MAIN world fetch/XHR capture)
+- apps/extension/src/entrypoints/content.ts (modified — added network log buffer, GET_NETWORK_LOGS handler)
+- apps/extension/src/lib/types.ts (modified — added GET_NETWORK_LOGS, CLEAR_NETWORK_LOGS)
+- apps/extension/src/entrypoints/background.ts (modified — added network message forwarding)
+
+**What Was Implemented:**
+- MAIN world script patches window.fetch() and XMLHttpRequest (open/send/setRequestHeader)
+- HAR-like NetworkEntry: URL, method, headers, status, timing (start/end/duration), body sizes
+- PII header auto-masking: Authorization, Cookie, Set-Cookie, X-API-Key, etc → [REDACTED]
+- Body capture opt-in (disabled by default) with 50KB truncation
+- Failed request detection (status >= 400 or network error)
+- XHR loadend listener captures response metadata after completion
+- 200-entry rolling network buffer in ISOLATED content script
+- CAPTURE_BUFFER now returns rrweb events + consoleLogs + networkLogs
+
+**Learnings:**
+- XHR patching requires storing metadata on the instance (__nobug) across open/send lifecycle
+- fetch() clone not needed for headers — response.headers is readable without consuming body
+- Both fetch errors (network failures) and 4xx/5xx responses are flagged as failed
+
+---

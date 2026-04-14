@@ -10,13 +10,19 @@
   },
   "dependencies": {
     "@nobug/shared": "workspace:*",
+    "fabric": "^7.2.0",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "rrweb": "2.0.0-alpha.4"
   },
   "devDependencies": {
+    "@tailwindcss/postcss": "^4.2.2",
     "@types/react": "^19.1.2",
     "@types/react-dom": "^19.1.2",
     "@wxt-dev/module-react": "^1.2.2",
+    "autoprefixer": "^10.4.27",
+    "postcss": "^8.5.9",
+    "tailwindcss": "^4.2.2",
     "typescript": "^5.8.3",
     "wxt": "^0.20.20"
   }

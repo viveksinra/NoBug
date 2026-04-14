@@ -6,6 +6,7 @@ export default defineConfig({
   manifest: {
     name: 'NoBug — Bug Capture',
     description: 'Capture bugs with recording, console logs, network requests, and screenshots.',
-    permissions: ['activeTab', 'storage'],
+    permissions: ['activeTab', 'storage', 'tabs', 'scripting', 'offscreen'],
+    host_permissions: ['http://localhost:3000/*'],
   },
 });
