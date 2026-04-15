@@ -1,10 +1,10 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-15T12:00:00Z",
-  "last_task_completed": "T-048",
+  "last_updated": "2026-04-15T13:00:00Z",
+  "last_task_completed": "T-049",
   "total_tasks": 55,
-  "completed": 32,
+  "completed": 35,
   "in_progress": null,
   "blocked": [],
   "tasks": [
@@ -108,13 +108,13 @@
       "id": "T-009",
       "phase": "1A",
       "title": "Team Invitation System",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T12:30:00Z",
+      "completed_at": "2026-04-15T13:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-008"],
-      "notes": ""
+      "notes": "Invitation router with 5 procedures: create (token+email), list, revoke, accept (creates Member), resend. Email template added. 7-day expiry. Duplicate checks."
     },
     {
       "id": "T-010",
@@ -492,13 +492,13 @@
       "id": "T-041",
       "phase": "1F",
       "title": "Backend REST API Routes for MCP",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T14:00:00Z",
+      "completed_at": "2026-04-15T14:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-039"],
-      "notes": ""
+      "notes": "REST API routes under /api/v1/bugs/ for MCP server consumption. GET list, POST create, GET detail, PATCH update, POST comment, GET search. All routes use Bearer API key auth via validateApiKey. Company-scoped queries, write permission checks, pagination."
     },
     {
       "id": "T-042",
@@ -588,13 +588,13 @@
       "id": "T-049",
       "phase": "1H",
       "title": "Regression Run Execution with Evidence",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T12:30:00Z",
+      "completed_at": "2026-04-15T13:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-048"],
-      "notes": ""
+      "notes": "7 procedures: runCreate/List/GetById/Start/submitResult/Complete/Summary. Polymorphic tester (MEMBER/AGENT). Summary stats (pass_rate, trend). Company ownership via suite->project chain."
     },
     {
       "id": "T-050",

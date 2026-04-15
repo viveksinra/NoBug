@@ -510,5 +510,30 @@
 - `inputSchema` accepts Zod raw shapes (object with z.string(), z.number(), etc.) — NOT z.object()
 - MCP SDK is ESM-only (`"type": "module"` required), needs `.js` extensions in imports
 - `StdioServerTransport` is in `@modelcontextprotocol/sdk/server/stdio.js` (subpath export)
+- REST API routes for MCP: Next.js App Router route handlers under `apps/web/src/app/api/v1/` — authenticate via `validateApiKey`, scope all queries to `company_id`
+
+---
+
+## 2026-04-15 — T-041: Backend REST API Routes for MCP
+
+**Files created:**
+- `apps/web/src/app/api/v1/bugs/route.ts` — GET (list with filters/pagination) + POST (create bug)
+- `apps/web/src/app/api/v1/bugs/search/route.ts` — GET (search by query string)
+- `apps/web/src/app/api/v1/bugs/[id]/route.ts` — GET (detail with comments/recordings/screenshots) + PATCH (update)
+- `apps/web/src/app/api/v1/bugs/[id]/comments/route.ts` — POST (add comment)
+
+**What was implemented:**
+- 6 REST API endpoints that the MCP server package (`@nobug/mcp-server`) calls via its ApiClient
+- All routes authenticate via `Authorization: Bearer nb_key_...` header using existing `validateApiKey`
+- Company-scoped queries — API key provides `company_id`, optionally `project_id`
+- Write operations check `permissions.write` on the API key
+- Pagination with `page`, `limit`, `total`, `has_more` on list/search endpoints
+- Search uses case-insensitive contains on title + description (same as tRPC issue.list)
+- Reporter set to API key ID with `AGENT` type on create
+- Comment author set to API key ID with `AGENT` type
+
+**Learnings:**
+- Next.js 15 App Router dynamic route params are now `Promise<{ id: string }>` (must await)
+- REST routes mirror tRPC router logic but with simpler auth (API key vs session+membership)
 
 ---

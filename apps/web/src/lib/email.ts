@@ -134,3 +134,61 @@ export async function sendVerificationEmail(to: string, verifyUrl: string) {
     `.trim(),
   });
 }
+
+export async function sendInvitationEmail(
+  to: string,
+  inviterName: string,
+  companyName: string,
+  acceptUrl: string
+) {
+  await sendEmail({
+    to,
+    subject: `You've been invited to join ${companyName} on NoBug`,
+    html: `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+</head>
+<body style="margin:0;padding:0;background-color:#f4f4f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:8px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+          <tr>
+            <td>
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#18181b;">NoBug</h1>
+              <p style="margin:0 0 24px;font-size:14px;color:#71717a;">Team Invitation</p>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f46;">
+                <strong>${inviterName}</strong> has invited you to join <strong>${companyName}</strong> on NoBug.
+              </p>
+              <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f46;">
+                Click the button below to accept the invitation and join the team.
+              </p>
+              <table cellpadding="0" cellspacing="0" style="margin:24px 0;">
+                <tr>
+                  <td style="background-color:#18181b;border-radius:6px;padding:12px 24px;">
+                    <a href="${acceptUrl}" style="color:#ffffff;text-decoration:none;font-size:14px;font-weight:600;display:inline-block;">
+                      Accept Invitation
+                    </a>
+                  </td>
+                </tr>
+              </table>
+              <p style="margin:0 0 8px;font-size:13px;line-height:1.5;color:#a1a1aa;">
+                If you don't recognize this invitation, you can safely ignore this email. The link expires in 7 days.
+              </p>
+              <p style="margin:24px 0 0;font-size:12px;color:#d4d4d8;border-top:1px solid #f4f4f5;padding-top:16px;">
+                NoBug &mdash; AI-native bug tracking
+              </p>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+    `.trim(),
+  });
+}

@@ -7,6 +7,8 @@ import { issueRouter } from './issue';
 import { notificationRouter } from './notification';
 import { quickCaptureRouter } from './quick-capture';
 import { regressionRouter } from './regression';
+import { invitationRouter } from './invitation';
+import { regressionRunRouter } from './regression-run';
 
 export const appRouter = router({
   company: companyRouter,
@@ -17,6 +19,8 @@ export const appRouter = router({
   notification: notificationRouter,
   quickCapture: quickCaptureRouter,
   regression: regressionRouter,
+  invitation: invitationRouter,
+  regressionRun: regressionRunRouter,
 });
 
 export type AppRouter = typeof appRouter;
