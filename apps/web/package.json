@@ -37,6 +37,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "resend": "^6.11.0",
+    "rrweb": "2.0.0-alpha.4",
+    "rrweb-player": "1.0.0-alpha.4",
     "superjson": "^2.2.6",
     "tailwind-merge": "^3.5.0",
     "zod": "^3.25.76"

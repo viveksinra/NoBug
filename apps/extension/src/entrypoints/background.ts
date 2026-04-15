@@ -8,7 +8,12 @@ import {
 } from '@/lib/auth';
 import { getConsentState, giveConsent, revokeConsent } from '@/lib/consent';
 import { getRedactionConfig, setRedactionConfig } from '@/lib/redaction-config';
+import { processQueue, getQueueStatus, clearFailedUploads } from '@/lib/upload-queue';
 import type { ExtensionMessage } from '@/lib/types';
+
+/** Alarm name for periodic queue processing */
+const QUEUE_ALARM_NAME = 'nobug_process_queue';
+const QUEUE_ALARM_INTERVAL_MINUTES = 5;
 
 // Recording message types that should be forwarded to the active tab's content script
 const CONTENT_SCRIPT_MESSAGES = new Set([
@@ -36,10 +41,35 @@ export default defineBackground(() => {
     },
   );
 
-  // When the extension is installed or updated, try to refresh auth
+  // When the extension is installed or updated, set up alarms and retry queue
   browser.runtime.onInstalled.addListener(async () => {
     console.log('[NoBug] Extension installed/updated — checking auth state');
     await refreshAuthState();
+
+    // Set up periodic alarm for queue processing
+    await setupQueueAlarm();
+
+    // Process any pending uploads from a previous session
+    processQueue().catch((err) =>
+      console.warn('[NoBug] Queue processing failed on install:', err),
+    );
+  });
+
+  // On service worker startup (e.g., after idle wake), process queue
+  setupQueueAlarm().then(() => {
+    processQueue().catch((err) =>
+      console.warn('[NoBug] Queue processing failed on startup:', err),
+    );
+  });
+
+  // Handle periodic alarm for queue retry
+  browser.alarms.onAlarm.addListener((alarm) => {
+    if (alarm.name === QUEUE_ALARM_NAME) {
+      console.log('[NoBug] Queue alarm fired — processing upload queue');
+      processQueue().catch((err) =>
+        console.warn('[NoBug] Queue processing failed on alarm:', err),
+      );
+    }
   });
 
   // Listen for tab updates — when user completes login on web app, refresh auth
@@ -54,9 +84,39 @@ export default defineBackground(() => {
       browser.runtime
         .sendMessage({ type: 'AUTH_CHANGED', payload: state } satisfies ExtensionMessage)
         .catch(() => {});
+
+      // After login, try to process any queued uploads
+      processQueue().catch(() => {});
     }
   });
+
+  // Listen for network reconnect via navigator.onLine changes
+  // In service workers, we use the global 'online' event
+  self.addEventListener('online', () => {
+    console.log('[NoBug] Network reconnected — processing upload queue');
+    processQueue().catch((err) =>
+      console.warn('[NoBug] Queue processing failed on reconnect:', err),
+    );
+  });
 });
+
+/**
+ * Set up the periodic alarm for queue processing.
+ * Idempotent — clears existing alarm before creating a new one.
+ */
+async function setupQueueAlarm(): Promise<void> {
+  try {
+    await browser.alarms.clear(QUEUE_ALARM_NAME);
+    await browser.alarms.create(QUEUE_ALARM_NAME, {
+      periodInMinutes: QUEUE_ALARM_INTERVAL_MINUTES,
+    });
+    console.log(
+      `[NoBug] Queue alarm set — every ${QUEUE_ALARM_INTERVAL_MINUTES} minutes`,
+    );
+  } catch (err) {
+    console.warn('[NoBug] Failed to set up queue alarm:', err);
+  }
+}
 
 /** Forward a message to the content script in the active tab */
 async function sendToActiveTab(message: ExtensionMessage): Promise<unknown> {
@@ -144,6 +204,19 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
   }
   if (message.type === 'SET_REDACTION_CONFIG') {
     await setRedactionConfig(message.payload);
+    return { ok: true };
+  }
+
+  // Upload queue messages
+  if (message.type === 'QUEUE_STATUS') {
+    return getQueueStatus();
+  }
+  if (message.type === 'RETRY_QUEUE') {
+    processQueue().catch(() => {});
+    return { ok: true };
+  }
+  if (message.type === 'CLEAR_FAILED_UPLOADS') {
+    await clearFailedUploads();
     return { ok: true };
   }
 

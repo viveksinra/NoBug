@@ -32,6 +32,9 @@ importers:
       '@nobug/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      dexie:
+        specifier: ^4.4.2
+        version: 4.4.2
       fabric:
         specifier: ^7.2.0
         version: 7.2.0
@@ -156,6 +159,12 @@ importers:
       resend:
         specifier: ^6.11.0
         version: 6.11.0
+      rrweb:
+        specifier: 2.0.0-alpha.4
+        version: 2.0.0-alpha.4
+      rrweb-player:
+        specifier: 1.0.0-alpha.4
+        version: 1.0.0-alpha.4
       superjson:
         specifier: ^2.2.6
         version: 2.2.6
@@ -2182,6 +2191,9 @@ packages:
     peerDependencies:
       typescript: '>=5.7.2'
 
+  '@tsconfig/svelte@1.0.13':
+    resolution: {integrity: sha512-5lYJP45Xllo4yE/RUBccBT32eBlRDbqN8r1/MIvQbKxW3aFqaYPCNgm8D5V20X4ShHcwvYWNlKg3liDh1MlBoA==}
+
   '@turbo/darwin-64@2.9.6':
     resolution: {integrity: sha512-X/56SnVXIQZBLKwniGTwEQTGmtE5brSACnKMBWpY3YafuxVYefrC2acamfjgxP7BG5w3I+6jf0UrLoSzgPcSJg==}
     cpu: [x64]
@@ -2959,6 +2971,9 @@ packages:
 
   detect-node-es@1.1.0:
     resolution: {integrity: sha512-ypdmJU/TbBby2Dxibuv7ZLW3Bs1QEmM7nHjEANfohJLvE0XVujisn1qPJcZxg+qDucsr+bP6fLD1rPS3AhJ7EQ==}
+
+  dexie@4.4.2:
+    resolution: {integrity: sha512-zMtV8q79EFE5U8FKZvt0Y/77PCU/Hr/RDxv1EDeo228L+m/HTbeN2AjoQm674rhQCX8n3ljK87lajt7UQuZfvw==}
 
   dom-serializer@2.0.0:
     resolution: {integrity: sha512-wIkAryiqt/nV5EQKqQpo3SToSOV9J0DnbJqwK7Wv/Trc92zIAYZ4FlMu+JPFW1DfGFt81ZTCGgDEabffXeLyJg==}
@@ -4390,6 +4405,9 @@ packages:
 
   rrweb-cssom@0.8.0:
     resolution: {integrity: sha512-guoltQEx+9aMf2gDZ0s62EcV8lsXR+0w8915TC3ITdn2YueuNjdAYh/levpU9nFaoChh9RUS5ZdQMrKfVEN9tw==}
+
+  rrweb-player@1.0.0-alpha.4:
+    resolution: {integrity: sha512-Wlmn9GZ5Fdqa37vd3TzsYdLl/JWEvXNUrLCrYpnOwEgmY409HwVIvvA5aIo7k582LoKgdRCsB87N+f0oWAR0Kg==}
 
   rrweb-snapshot@2.0.0-alpha.4:
     resolution: {integrity: sha512-KQ2OtPpXO5jLYqg1OnXS/Hf+EzqnZyP5A+XPqBCjYpj3XIje/Od4gdUwjbFo3cVuWq5Cw5Y1d3/xwgIS7/XpQQ==}
@@ -6879,6 +6897,8 @@ snapshots:
     dependencies:
       typescript: 5.9.3
 
+  '@tsconfig/svelte@1.0.13': {}
+
   '@turbo/darwin-64@2.9.6':
     optional: true
 
@@ -7658,6 +7678,8 @@ snapshots:
   detect-libc@2.1.2: {}
 
   detect-node-es@1.1.0: {}
+
+  dexie@4.4.2: {}
 
   dom-serializer@2.0.0:
     dependencies:
@@ -9141,6 +9163,11 @@ snapshots:
 
   rrweb-cssom@0.8.0:
     optional: true
+
+  rrweb-player@1.0.0-alpha.4:
+    dependencies:
+      '@tsconfig/svelte': 1.0.13
+      rrweb: 2.0.0-alpha.4
 
   rrweb-snapshot@2.0.0-alpha.4: {}
 

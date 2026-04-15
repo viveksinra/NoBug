@@ -79,4 +79,8 @@ export type ExtensionMessage =
   | { type: 'GIVE_CONSENT' }
   | { type: 'REVOKE_CONSENT' }
   | { type: 'GET_REDACTION_CONFIG' }
-  | { type: 'SET_REDACTION_CONFIG'; payload: import('@/lib/pii-redaction').RedactionConfig };
+  | { type: 'SET_REDACTION_CONFIG'; payload: import('@/lib/pii-redaction').RedactionConfig }
+  // Upload queue messages
+  | { type: 'QUEUE_STATUS' }
+  | { type: 'RETRY_QUEUE' }
+  | { type: 'CLEAR_FAILED_UPLOADS' };
