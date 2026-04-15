@@ -613,3 +613,89 @@
 - Did NOT modify `_app.ts` per task instructions — router must be wired up separately
 
 ---
+
+## Iteration — 2026-04-15 — T-050 Smart Re-Testing and Flaky Test Detection
+
+**Files created:**
+- `apps/web/src/server/routers/regression-analytics.ts`
+
+**Files modified:**
+- `STATUS.json` — marked T-050 completed
+- `progress.md` — this entry
+
+**What was implemented:**
+- `regressionAnalyticsRouter` with 6 procedures:
+  1. `detectFlaky` — analyzes last N completed runs, calculates flaky_score = failCount/totalRuns for mixed PASS/FAIL cases, batch updates TestCase.flaky_score
+  2. `getFlakyCases` — lists test cases by flaky_score descending with threshold filter
+  3. `suggestRetest` — finds failed test cases with flaky_score > 0.3 from a completed run
+  4. `createRetestRun` — creates a new RegressionRun with retest metadata in stats_json
+  5. `testCaseHistory` — returns pass/fail history for a test case across runs
+  6. `suiteHealthReport` — aggregates totalCases, flakyCount, avgPassRate, lastRunDate, coverageByTier
+
+**Learnings:**
+- Reused `verifySuiteOwnership` and `verifyRunOwnership` helper patterns from `regression-run.ts`
+- Used `Promise.all` for batch flaky_score updates to avoid sequential DB calls
+- RegressionRun.trigger enum is `RunTrigger` (MANUAL/DEPLOY_WEBHOOK/SCHEDULED) — stored RETEST info in stats_json.retest_of instead of adding enum value
+- Did NOT modify `_app.ts` per task instructions — router must be wired up separately
+
+---
+
+## [2026-04-15] — Task T-052: Sentry Observability and Structured Logging
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/sentry.client.config.ts (created — browser-side Sentry init with replay)
+- apps/web/sentry.server.config.ts (created — server-side Sentry init)
+- apps/web/sentry.edge.config.ts (created — edge runtime Sentry init)
+- apps/web/src/lib/logger.ts (created — structured logging with Sentry integration)
+- apps/web/src/app/global-error.tsx (created — Next.js global error boundary)
+- apps/web/next.config.ts (modified — wrapped with withSentryConfig)
+- apps/web/package.json (modified — added @sentry/nextjs dependency)
+
+**What Was Implemented:**
+- Sentry client/server/edge config files that read DSN from NEXT_PUBLIC_SENTRY_DSN, gracefully no-op when not set
+- Client config includes replay integration (0.1 session rate, 1.0 error rate) with text masking and media blocking
+- Traces sample rate: 0.1 in production, 1.0 in development
+- Structured logger with createLogger(namespace) factory — debug/info/warn/error levels
+- Dev mode: colored console output with namespace prefix; Production: JSON format for log aggregation
+- logger.error() auto-reports to Sentry (captureException for Error objects, captureMessage otherwise)
+- Global error boundary reports unhandled errors to Sentry and shows user-friendly reset UI
+- next.config.ts conditionally wraps with withSentryConfig only when DSN is set
+- Source map upload disabled when SENTRY_AUTH_TOKEN is not set
+- Build verified passing with `pnpm turbo build --filter=@nobug/web`
+
+**Learnings:**
+- @sentry/nextjs withSentryConfig can be conditionally applied — check env var at config time
+- Sentry sourcemaps.disable option prevents upload failures when no auth token is configured
+- Logger Sentry calls (captureException/captureMessage) are no-ops when Sentry isn't initialized — safe to call unconditionally
+
+---
+
+## [2026-04-15] — Task T-054: Company and Project Settings Pages
+**Status:** completed
+**Iteration:** 1
+**Files Created:**
+- apps/web/src/components/settings/settings-shell.tsx (shared SettingsShell, SettingsSection, DangerZone, SettingsCard components)
+- apps/web/src/components/settings/confirm-dialog.tsx (reusable confirmation dialog)
+- apps/web/src/app/(dashboard)/[companySlug]/settings/page.tsx (company settings: name/slug editor, logo placeholder, plan display, danger zone)
+- apps/web/src/app/(dashboard)/[companySlug]/settings/members/page.tsx (members: invitation list, invite modal, resend/revoke, role display)
+- apps/web/src/app/(dashboard)/[companySlug]/[projectKey]/settings/page.tsx (project settings: name/description editor, JSON settings editor, archive)
+- apps/web/src/app/(dashboard)/[companySlug]/settings/api-keys/page.tsx (API keys: list, generate with copy-once, revoke, usage docs)
+
+**What was implemented:**
+- 4 settings pages under (dashboard) route group with dark theme styling
+- Shared settings layout components for consistent UI across all settings pages
+- All pages use tRPC client queries/mutations for data operations
+- Loading states with Skeleton, error states, empty states
+- Confirmation dialogs for destructive actions (delete company, archive project, revoke key/invitation)
+- API key page shows key exactly once with copy button and warning
+- Members page integrates with invitation router (create, list, resend, revoke)
+- Project settings includes JSON editor for advanced configuration
+
+**Learnings:**
+- company.getBySlug returns currentUserRole and _count — sufficient for permission checks in UI
+- companyProcedure requires { companyId } input — all company-scoped mutations need this
+- invitation.create uses requirePermission('manage_members') which chains companyProcedure — needs companyId in input
+- apiKey.list/generate/revoke use requirePermission('manage_api_keys') — also needs companyId
+
+---

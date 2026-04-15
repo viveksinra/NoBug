@@ -10,6 +10,7 @@ import { regressionRouter } from './regression';
 import { invitationRouter } from './invitation';
 import { regressionRunRouter } from './regression-run';
 import { integrationRouter } from './integration';
+import { regressionAnalyticsRouter } from './regression-analytics';
 
 export const appRouter = router({
   company: companyRouter,
@@ -23,6 +24,7 @@ export const appRouter = router({
   invitation: invitationRouter,
   regressionRun: regressionRunRouter,
   integration: integrationRouter,
+  regressionAnalytics: regressionAnalyticsRouter,
 });
 
 export type AppRouter = typeof appRouter;
