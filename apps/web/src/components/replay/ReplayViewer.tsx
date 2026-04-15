@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
-import type { eventWithTime } from 'rrweb';
 import { ReplayControls } from './ReplayControls';
 import { Loader2, AlertTriangle } from 'lucide-react';
 
@@ -9,9 +8,12 @@ import { Loader2, AlertTriangle } from 'lucide-react';
 // Types
 // ---------------------------------------------------------------------------
 
+/** Minimal rrweb event type — the full type lives in @rrweb/types (transitive dep) */
+export type RRWebEvent = Record<string, unknown> & { timestamp: number; type: number };
+
 export interface ReplayViewerProps {
   /** rrweb events array */
-  events: eventWithTime[] | null;
+  events: RRWebEvent[] | null;
   /** Whether events are still loading */
   loading?: boolean;
   /** Error message to display */
@@ -58,6 +60,7 @@ export function ReplayViewer({ events, loading, error }: ReplayViewerProps) {
       try {
         const { default: rrwebPlayer } = await import('rrweb-player');
         // Also import the CSS
+        // @ts-expect-error -- CSS module has no type declarations
         await import('rrweb-player/dist/style.css');
 
         if (cancelled || !container) return;
@@ -65,7 +68,7 @@ export function ReplayViewer({ events, loading, error }: ReplayViewerProps) {
         const player = new rrwebPlayer({
           target: container,
           props: {
-            events,
+            events: events as any, // eslint-disable-line @typescript-eslint/no-explicit-any
             width: container.clientWidth,
             height: Math.round(container.clientWidth * 9 / 16),
             autoPlay: false,

@@ -853,3 +853,120 @@
 - Gzip content-encoding set only for JSON-based types (recordings, console-logs, network-logs)
 - Prisma JSON fields need explicit `as Prisma.InputJsonValue` cast for `z.record(z.unknown())` inputs
 - REST extension endpoint validates same size limits as tRPC to prevent bypassing
+
+---
+
+## [2026-04-15] — Task T-032: Service Worker Lifecycle and IndexedDB Retry
+**Status:** completed
+**Iteration:** 1
+**Files Created:**
+- apps/extension/src/lib/db.ts (Dexie.js IndexedDB schema — pendingUploads + captureHistory tables)
+- apps/extension/src/lib/upload-queue.ts (upload queue with exponential backoff retry)
+- apps/extension/src/lib/useUploadQueue.ts (React hook for popup queue status display)
+
+**Files Modified:**
+- apps/extension/src/entrypoints/background.ts (added queue processing on install/startup/alarm/reconnect, QUEUE_STATUS/RETRY_QUEUE/CLEAR_FAILED_UPLOADS message handlers)
+- apps/extension/wxt.config.ts (added 'alarms' permission)
+- apps/extension/src/lib/types.ts (added QUEUE_STATUS, RETRY_QUEUE, CLEAR_FAILED_UPLOADS message types)
+- apps/extension/package.json (added dexie dependency)
+
+**What was implemented:**
+- Dexie.js IndexedDB database `nobug_extension` with two tables:
+  - `pendingUploads`: id, type, data, captureId, createdAt, retryCount, lastRetryAt, status — indexed by status and captureId
+  - `captureHistory`: id, slug, title, shareUrl, screenshotThumb, createdAt, type — auto-prunes to 50 entries
+- Upload queue (`upload-queue.ts`) with:
+  - `enqueueUpload()` stores data in IndexedDB
+  - `processQueue()` idempotent processing with exponential backoff (1m/5m/30m/2hr), max 5 retries
+  - `getQueueStatus()` returns pending/uploading/failed counts
+  - `clearFailedUploads()` removes permanently failed items
+  - Badge count updates on extension icon for pending uploads
+  - Actual S3 upload via presigned URLs from `/api/extension/upload`
+- Service worker lifecycle:
+  - `chrome.alarms` every 5 minutes triggers `processQueue()`
+  - `self.addEventListener('online')` triggers queue on network reconnect
+  - `onInstalled` and startup both process queue
+  - Login completion triggers queue processing
+- React hook `useUploadQueue` polls service worker every 10s for queue status
+
+**Learnings:**
+- Dexie.js EntityTable generic provides typed table access — `EntityTable<PendingUpload, 'id'>` for auto-increment primary key
+- Service workers can listen for `online` event via `self.addEventListener('online')` for network reconnect detection
+- chrome.alarms requires 'alarms' permission in manifest — minimum interval is 1 minute in production, but periodInMinutes works with 5
+- Badge management needs care when both recording state and queue count use the badge — queue only overwrites non-recording badges
+
+---
+
+### 2026-04-15 — T-045: Azure DevOps 2-Way Sync
+
+**Files changed:**
+- `apps/web/src/server/integrations/adapters/azure-devops.ts` (CREATED)
+- `apps/web/src/server/integrations/registry.ts` (modified — added AZURE_DEVOPS registration)
+- `STATUS.json` (updated T-045 status)
+
+**What was implemented:**
+- Azure DevOps adapter extending BaseAdapter with full 2-way work item sync
+- connect: validates PAT via GET /_apis/projects, stores org + project config
+- disconnect: clears stored auth via super.disconnect()
+- testConnection: verifies PAT validity by listing projects
+- pushIssue: creates or updates work items using JSON Patch operations (System.Title, System.Description as HTML, Microsoft.VSTS.Common.Priority 1-4, System.State)
+- pullIssue: fetches work item by ID, maps all fields back to IssueSyncData
+- syncIssueStatus: updates just the System.State field
+- handleWebhook: parses Azure DevOps service hook payloads (publisherId: tfs, workitem.created/updated/deleted)
+- Registered adapter in registry as AZURE_DEVOPS
+
+**Learnings:**
+- Azure DevOps REST API uses JSON Patch (Content-Type: application/json-patch+json) for work item create/update — array of {op, path, value} operations
+- PAT auth uses Basic auth with empty username: `Basic ${Buffer.from(':' + pat).toString('base64')}`
+- New work items cannot set System.State at creation time in some process templates — must create first then update state separately
+- Azure DevOps webhook payloads have publisherId 'tfs' and work item ID can be at resource.id, resource.workItemId, or resource.revision.id depending on event type
+
+---
+
+## [2026-04-15] — Task T-030: Full Platform Bug Submission Flow
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/extension/src/components/FullCapture.tsx (created — full platform capture + issue creation UI)
+- apps/extension/src/components/FullMode.tsx (modified — wire Capture Bug to show FullCapture)
+- apps/web/src/app/api/extension/projects/route.ts (created — GET projects for company)
+- apps/web/src/app/api/extension/assignees/route.ts (created — GET members + agents for company)
+- apps/web/src/app/api/extension/create-issue/route.ts (created — POST create issue from extension)
+
+**What Was Implemented:**
+- FullCapture component: multi-state UI (capturing/form/submitting/success/error), reuses performCapture() from capture.ts
+- Form fields: title (required), AI description placeholder, optional notes, project selector, priority selector, assignee selector (members + agents grouped), labels multi-select, integration sync placeholder
+- Three REST API endpoints for extension use: projects (company-scoped), assignees (members + agents), create-issue (full issue creation with activity log, agent task)
+- All endpoints support dual auth: session cookie (credentials: include) and API key Bearer token
+- FullMode updated: Capture Bug button now opens FullCapture flow instead of just calling performCapture
+- Success state shows issue key, URL with copy button, and View Issue link
+
+**Learnings:**
+- User model uses `avatar_url` not `image` — Better Auth maps differently than typical NextAuth conventions
+- AgentTaskType enum has BUG_ANALYSIS, CODE_REVIEW, etc. — not FIX_BUG (check schema enums before using string literals)
+- Recording/Screenshot Prisma models require non-nullable uploader_id and storage_url — cannot create placeholder records without S3 URLs; media records should be created after S3 upload via the upload pipeline
+- Extension REST endpoints follow pattern: auth check (API key or session) -> membership verification -> business logic -> JSON response
+
+---
+
+## [2026-04-15] — Task T-033: rrweb Replay Viewer Component
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/components/replay/ReplayViewer.tsx (created -- main rrweb player wrapper)
+- apps/web/src/components/replay/ReplayControls.tsx (created -- custom playback controls)
+- apps/web/src/app/(dashboard)/[companySlug]/[projectKey]/issues/[issueNumber]/recording/[recordingId]/page.tsx (created -- recording viewer page)
+- apps/web/src/app/b/[slug]/page.tsx (created -- Quick Capture public viewer)
+- apps/web/package.json (modified -- added rrweb-player and rrweb deps)
+
+**What Was Implemented:**
+- ReplayViewer component: dynamically imports rrweb-player (client-side only), responsive sizing via ResizeObserver, loading/error/empty states, dark theme, CSS override for hiding built-in controls
+- ReplayControls component: play/pause, speed cycling (1x/2x/4x), seek bar with click-to-jump, time display, fullscreen toggle
+- Recording viewer page: fetches recording by ID from issue data, gets S3 download URL via tRPC, decompresses gzip if needed, shows metadata (duration, event count, page URL, timestamp)
+- Quick Capture viewer page: public (no auth), password prompt if protected, tabbed layout (Recording/Console/Network/Screenshot/Environment), fetches all data types from S3 URLs, console/network log panels with syntax coloring
+
+**Learnings:**
+- rrweb v2 alpha exports `eventWithTime` from `@rrweb/types` (transitive dep), not from `rrweb` directly -- use a local type alias to avoid adding another dep
+- rrweb-player CSS needs dynamic import with `@ts-expect-error` since the `.css` module has no type declarations
+- rrweb-player constructor takes `{ target, props }` pattern (Svelte component) -- use `$set()` for runtime updates
+- `Uint8Array[]` is not assignable to `BlobPart[]` in strict TS -- cast through `unknown` at the boundary
+- The `@next/next/no-img-element` ESLint rule is not available in the project's ESLint config -- avoid referencing it

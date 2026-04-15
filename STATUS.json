@@ -1,10 +1,10 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-15T20:00:00Z",
-  "last_task_completed": "T-031",
+  "last_updated": "2026-04-15T23:00:00Z",
+  "last_task_completed": "T-033",
   "total_tasks": 55,
-  "completed": 48,
+  "completed": 52,
   "in_progress": null,
   "blocked": [],
   "tasks": [
@@ -360,13 +360,13 @@
       "id": "T-030",
       "phase": "1C",
       "title": "Full Platform Bug Submission Flow",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T21:00:00Z",
+      "completed_at": "2026-04-15T21:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-029", "T-016"],
-      "notes": ""
+      "notes": "FullCapture component with project/priority/assignee selectors. REST endpoints: /api/extension/projects, /api/extension/assignees, /api/extension/create-issue. FullMode wired to show FullCapture on Capture Bug click. Integration sync placeholder."
     },
     {
       "id": "T-031",
@@ -384,25 +384,25 @@
       "id": "T-032",
       "phase": "1C",
       "title": "Service Worker Lifecycle and IndexedDB Retry",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T21:00:00Z",
+      "completed_at": "2026-04-15T21:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-024", "T-031"],
-      "notes": ""
+      "notes": "Dexie.js IndexedDB with pendingUploads + captureHistory tables. Upload queue with exponential backoff (1m/5m/30m/2hr, max 5 retries). chrome.alarms every 5min + online event for retry. Badge count for pending uploads. useUploadQueue React hook. QUEUE_STATUS/RETRY_QUEUE/CLEAR_FAILED_UPLOADS message types."
     },
     {
       "id": "T-033",
       "phase": "1D",
       "title": "rrweb Replay Viewer Component",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T22:30:00Z",
+      "completed_at": "2026-04-15T23:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-024", "T-031"],
-      "notes": ""
+      "notes": "ReplayViewer + ReplayControls components with dynamic rrweb-player import. Recording viewer page for issues. Quick Capture public viewer with tabbed layout (Recording/Console/Network/Screenshot/Environment). Password protection, gzip decompression, dark theme."
     },
     {
       "id": "T-034",
@@ -540,13 +540,13 @@
       "id": "T-045",
       "phase": "1G",
       "title": "Azure DevOps 2-Way Sync",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T22:00:00Z",
+      "completed_at": "2026-04-15T22:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-042"],
-      "notes": ""
+      "notes": "Full Azure DevOps adapter with PAT auth, work item CRUD via REST API (JSON Patch), priority mapping (CRITICAL→1, HIGH→2, MEDIUM→3, LOW→4), bidirectional status mapping, webhook handling for workitem.created/updated/deleted (publisherId: tfs)."
     },
     {
       "id": "T-046",
