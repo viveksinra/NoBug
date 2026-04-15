@@ -970,3 +970,66 @@
 - rrweb-player constructor takes `{ target, props }` pattern (Svelte component) -- use `$set()` for runtime updates
 - `Uint8Array[]` is not assignable to `BlobPart[]` in strict TS -- cast through `unknown` at the boundary
 - The `@next/next/no-img-element` ESLint rule is not available in the project's ESLint config -- avoid referencing it
+
+## [2026-04-15] -- Task T-034: Synchronized Timeline with Console/Network Panels
+**Status:** completed
+
+**Files created:**
+- `apps/web/src/components/replay/Timeline.tsx` -- Master timeline with markers, zoom, seek
+- `apps/web/src/components/replay/ConsolePanel.tsx` -- Virtualized console log viewer with filters
+- `apps/web/src/components/replay/NetworkPanel.tsx` -- Network request table with waterfall bars
+- `apps/web/src/components/replay/SyncedViewer.tsx` -- Layout component orchestrating all panels
+
+**What was implemented:**
+- Timeline component with color-coded markers (console errors red, network failures orange, clicks blue, navigations green), zoom in/out/reset, time labels, click-to-seek, playhead indicator
+- ConsolePanel with level filter buttons (All/Error/Warn/Info/Debug) with counts, text search, virtualized window of ±50 entries around current time, auto-scroll to active entry, expandable args and stack traces, color-coded by level
+- NetworkPanel with status (all/success/failed) and method (GET/POST/PUT/PATCH/DELETE) filters, URL search, table with method/URL/status/duration/size/waterfall columns, expandable row detail with request/response headers and timing, failed requests highlighted red
+- SyncedViewer orchestrates ReplayViewer + Timeline + tabbed Console/Network panels with time synchronization via DOM polling of ReplayViewer's seek bar aria-valuenow, and seek-back via simulated click events on the seek bar
+
+**Learnings:**
+- Since ReplayViewer cannot be modified (task constraint), synchronization is achieved by polling the seek bar's `aria-valuenow` attribute and simulating click events for seek-back -- a pragmatic approach that avoids modifying existing components
+- Console/network entries use performance.now() timestamps that align with rrweb events; offset from first rrweb event timestamp gives the playback position
+- rrweb event type 3 (IncrementalSnapshot) with data.source=2 (MouseInteraction) and data.type=2 represents clicks; type 4 (Meta) with data.href represents navigation
+
+---
+
+## [2026-04-16] — Task T-035: Environment Info Panel and Screenshot Gallery
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/components/replay/EnvironmentPanel.tsx (created)
+- apps/web/src/components/replay/ScreenshotGallery.tsx (created)
+- apps/web/src/components/replay/BugDetailSidebar.tsx (created)
+
+**What Was Implemented:**
+- EnvironmentPanel: Responsive 2-column grid displaying page URL (clickable with copy button), browser+version, OS (with mobile icon detection), viewport dimensions, device pixel ratio, framework (as colored badge), capture timestamp, and collapsible user agent. Handles null/missing fields gracefully.
+- ScreenshotGallery: Grid of 2-3 thumbnails per row with hover zoom effect and annotated badge. Full lightbox with fixed overlay, keyboard navigation (arrows, Escape), scroll-to-zoom, click-and-drag pan at zoom>1, original/annotated toggle, download button, bottom thumbnail strip. Empty state with icon.
+- BugDetailSidebar: Combines EnvironmentPanel + ScreenshotGallery + recording info into collapsible sidebar sections. Recording info shows duration, event count, file size. Capture metadata shows timestamp and mode (quick/full badge). Shareable link with copy button. "Promote to Issue" button for Quick Captures.
+
+**Learnings:**
+- EnvironmentInfo interface matches the extension's collectEnvironment() output shape from apps/extension/src/lib/environment.ts
+- Pre-existing build error in ShareDialog.tsx (references nonexistent `share` tRPC router) does not affect these components; tsc --noEmit passes cleanly
+
+---
+
+## [2026-04-16] — Task T-036: Public Shareable Links and Promote-to-Issue
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/server/routers/share.ts (created — shareRouter with 7 procedures)
+- apps/web/src/server/routers/_app.ts (modified — added shareRouter registration)
+- apps/web/src/components/share/ShareDialog.tsx (created — share dialog with URL copy, QR, embed, email, Slack, password, expiry)
+- apps/web/src/components/share/PromoteToIssue.tsx (created — promote dialog with project/priority/assignee/label selection)
+- apps/web/src/app/(dashboard)/[companySlug]/captures/page.tsx (created — captures list page with filtering)
+
+**What Was Implemented:**
+- tRPC shareRouter with 7 procedures: setPassword, removePassword, updateExpiry, getShareInfo, promoteToIssue, deleteCapture, listCaptures
+- ShareDialog component: read-only URL field with copy button, QR code (SVG-based generator), password protection toggle, expiry extension (+7/30/90 days), embed code snippet, social share (email mailto:, Slack deep link, open in new tab)
+- PromoteToIssue component: project selector, title (pre-filled from capture), priority, type, assignee (unified members+agents from listAssignable), labels for selected project. Creates Issue with linked Recording and Screenshot records. Updates QuickCapture.converted_to_issue_id. Success state shows issue link.
+- Captures list page: grid with thumbnail, title, date, view count, expiry, password badge, promoted badge. Filter tabs (all/active/expired). Actions: copy link, share settings dialog, open, promote to issue, delete with confirmation. Infinite scroll pagination.
+- promoteToIssue creates Recording (with console_logs_url, network_logs_url, environment_json) and Screenshot records linked to the new Issue.
+
+**Learnings:**
+- agent.listAssignable returns { members: [...], agents: [...] } object, not a flat array — need to spread both into a unified list for assignee dropdowns
+- Share URL format: {APP_URL}/b/{slug}, embed URL: {APP_URL}/b/{slug}/embed
+- protectedProcedure (user-owned operations) vs requirePermission('create_issue') (company-scoped promote) for different auth levels

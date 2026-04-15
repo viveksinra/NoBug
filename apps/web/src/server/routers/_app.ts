@@ -14,6 +14,7 @@ import { regressionAnalyticsRouter } from './regression-analytics';
 import { uploadRouter } from './upload';
 import { gdprRouter } from './gdpr';
 import { webhookRouter } from './webhook';
+import { shareRouter } from './share';
 
 export const appRouter = router({
   company: companyRouter,
@@ -31,6 +32,7 @@ export const appRouter = router({
   upload: uploadRouter,
   gdpr: gdprRouter,
   webhook: webhookRouter,
+  share: shareRouter,
 });
 
 export type AppRouter = typeof appRouter;
