@@ -9,6 +9,7 @@ import { quickCaptureRouter } from './quick-capture';
 import { regressionRouter } from './regression';
 import { invitationRouter } from './invitation';
 import { regressionRunRouter } from './regression-run';
+import { integrationRouter } from './integration';
 
 export const appRouter = router({
   company: companyRouter,
@@ -21,6 +22,7 @@ export const appRouter = router({
   regression: regressionRouter,
   invitation: invitationRouter,
   regressionRun: regressionRunRouter,
+  integration: integrationRouter,
 });
 
 export type AppRouter = typeof appRouter;

@@ -102,4 +102,8 @@ export class ApiClient {
   async patch<T = unknown>(path: string, body?: unknown): Promise<T> {
     return this.request<T>("PATCH", path, body);
   }
+
+  async put<T = unknown>(path: string, body?: unknown): Promise<T> {
+    return this.request<T>("PUT", path, body);
+  }
 }

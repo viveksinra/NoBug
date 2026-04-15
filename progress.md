@@ -537,3 +537,79 @@
 - REST routes mirror tRPC router logic but with simpler auth (API key vs session+membership)
 
 ---
+
+## [2026-04-15] — Task T-040: MCP Server — Regression and Agent Tools
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- packages/mcp-server/src/tools.ts (modified — added 8 new MCP tools + 5 interface types)
+- packages/mcp-server/src/api-client.ts (modified — added put() method)
+
+**What Was Implemented:**
+- 5 regression tools: list_regression_suites, get_regression_suite, create_regression_run, submit_test_result, get_run_summary
+- 3 agent tools: get_agent_tasks, update_agent_task, claim_agent_task
+- All tools follow same registerTool pattern as existing 6 bug tools
+- Zod input validation with descriptive field descriptions for AI agents
+- REST endpoints: /api/v1/regression/* and /api/v1/agents/* (to be created in future tasks)
+- TypeScript interfaces: RegressionSuite, RegressionRun, TestResult, RunSummary, AgentTask
+- Added put() to ApiClient for completeness
+
+**Learnings:**
+- MCP tools for regression and agent workflows follow identical pattern to bug tools — consistency is key for AI agent usability
+
+---
+
+## [2026-04-15] — Task T-051: Rate Limiting and Security Headers
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/lib/rate-limit.ts (created — rate limiting utility with 3 preset limiters)
+- apps/web/src/lib/security-headers.ts (created — security headers helper)
+- apps/web/src/middleware.ts (modified — added security headers + rate limiting)
+- apps/web/package.json (modified — added rate-limiter-flexible dependency)
+
+**What was implemented:**
+- In-memory rate limiting using rate-limiter-flexible (RateLimiterMemory)
+- Three preset limiters: authLimiter (5/min), apiLimiter (100/min), quickCaptureLimiter (10/hr)
+- Generic rateLimit() helper that returns success/failure with retryAfter
+- Security headers applied to all responses (X-Content-Type-Options, X-Frame-Options, X-XSS-Protection, Referrer-Policy, Permissions-Policy)
+- HSTS header only in production
+- Rate limiting applied to /api/auth/* and /api/extension/quick-capture in middleware
+- 429 Too Many Requests responses include Retry-After header
+- Middleware matcher expanded to cover API routes (previously excluded /api/auth)
+
+**Learnings:**
+- NextRequest.ip is not available in Next.js 15 types — use x-forwarded-for/x-real-ip headers instead
+- Edge middleware cannot use Node.js-only modules; rate-limiter-flexible's RateLimiterMemory works fine in edge runtime
+
+---
+
+## [2026-04-15] — Task T-042: Integration Adapter Framework
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/server/integrations/types.ts (created — IntegrationAdapter interface + supporting types)
+- apps/web/src/server/integrations/base-adapter.ts (created — abstract base with retry, logging, error handling)
+- apps/web/src/server/integrations/registry.ts (created — provider-to-adapter factory registry)
+- apps/web/src/server/integrations/adapters/github.ts (created — stub GitHub adapter)
+- apps/web/src/server/integrations/adapters/jira.ts (created — stub Jira adapter)
+- apps/web/src/server/integrations/adapters/slack.ts (created — stub Slack adapter)
+- apps/web/src/server/integrations/index.ts (created — barrel exports)
+- apps/web/src/server/routers/integration.ts (created — tRPC router with 8 procedures)
+
+**What Was Implemented:**
+- IntegrationAdapter interface with connection lifecycle, issue sync, and webhook handling
+- BaseAdapter abstract class with structured logging, exponential backoff retry, ensureConnected guard
+- IntegrationError class with retryable flag and status code
+- Adapter registry with getAdapter/hasAdapter/registerAdapter/getAvailableProviders
+- Stub adapters for GitHub (T-043), Jira (T-044), Slack (T-046) — all throw "not implemented"
+- tRPC router: create, list, getById, testConnection, delete, toggleEnabled, syncIssue, availableProviders
+- Write ops use requirePermission('manage_integrations'), reads use companyProcedure
+- syncIssue creates or updates ExternalRef records with sync_status tracking
+
+**Learnings:**
+- Prisma JSON fields need `as Prisma.InputJsonValue` cast when receiving `z.record(z.unknown())` input
+- Import `Prisma` type from `@nobug/db` (not `@prisma/client`) since the db package re-exports everything
+- Did NOT modify `_app.ts` per task instructions — router must be wired up separately
+
+---

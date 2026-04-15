@@ -1,10 +1,10 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-15T13:00:00Z",
-  "last_task_completed": "T-049",
+  "last_updated": "2026-04-15T16:00:00Z",
+  "last_task_completed": "T-042",
   "total_tasks": 55,
-  "completed": 35,
+  "completed": 38,
   "in_progress": null,
   "blocked": [],
   "tasks": [
@@ -480,13 +480,13 @@
       "id": "T-040",
       "phase": "1F",
       "title": "MCP Server -- Regression and Agent Tools",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T14:00:00Z",
+      "completed_at": "2026-04-15T14:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-039"],
-      "notes": ""
+      "notes": "Added 8 new MCP tools: 5 regression (list_regression_suites, get_regression_suite, create_regression_run, submit_test_result, get_run_summary) and 3 agent (get_agent_tasks, update_agent_task, claim_agent_task). Added put() method to ApiClient. All tools follow existing registerTool pattern with Zod input validation and JSON content responses."
     },
     {
       "id": "T-041",
@@ -504,13 +504,13 @@
       "id": "T-042",
       "phase": "1G",
       "title": "Integration Adapter Framework",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T16:00:00Z",
+      "completed_at": "2026-04-15T16:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-016"],
-      "notes": ""
+      "notes": "IntegrationAdapter interface, BaseAdapter with retry/logging, registry pattern, stub adapters (GitHub/Jira/Slack), tRPC router with 8 procedures."
     },
     {
       "id": "T-043",
@@ -612,13 +612,13 @@
       "id": "T-051",
       "phase": "cross",
       "title": "Rate Limiting and Security Headers",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T14:30:00Z",
+      "completed_at": "2026-04-15T15:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-006"],
-      "notes": ""
+      "notes": "rate-limiter-flexible with 3 preset limiters (auth 5/min, api 100/min, quickCapture 10/hr). Security headers on all responses. Middleware updated to apply rate limiting on /api/auth/* and /api/extension/quick-capture. HSTS only in production."
     },
     {
       "id": "T-052",

@@ -32,6 +32,62 @@ interface Comment {
   [key: string]: unknown;
 }
 
+interface RegressionSuite {
+  id: string;
+  name: string;
+  description?: string;
+  project_id: string;
+  created_at: string;
+  updated_at: string;
+  [key: string]: unknown;
+}
+
+interface RegressionRun {
+  id: string;
+  suite_id: string;
+  status: string;
+  trigger_type: string;
+  started_at?: string;
+  completed_at?: string;
+  created_at: string;
+  [key: string]: unknown;
+}
+
+interface TestResult {
+  id: string;
+  run_id: string;
+  test_case_id: string;
+  result: string;
+  notes?: string;
+  evidence_url?: string;
+  duration_ms?: number;
+  [key: string]: unknown;
+}
+
+interface RunSummary {
+  run_id: string;
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+  blocked: number;
+  pass_rate: number;
+  [key: string]: unknown;
+}
+
+interface AgentTask {
+  id: string;
+  agent_id: string;
+  issue_id?: string;
+  type: string;
+  status: string;
+  input_json?: unknown;
+  output_json?: unknown;
+  created_at: string;
+  updated_at: string;
+  [key: string]: unknown;
+}
+
 // ─── Tool Registration ───────────────────────────────────────────
 
 export function registerTools(server: McpServer, api: ApiClient): void {
@@ -307,6 +363,332 @@ export function registerTools(server: McpServer, api: ApiClient): void {
 
       const result = await api.get<{ bugs: Bug[]; total: number }>(
         `/bugs/search?${params.toString()}`
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ═══════════════════════════════════════════════════════════════════
+  // REGRESSION TOOLS
+  // ═══════════════════════════════════════════════════════════════════
+
+  // ── list_regression_suites ───────────────────────────────────────
+  server.registerTool(
+    "list_regression_suites",
+    {
+      title: "List Regression Suites",
+      description:
+        "List regression test suites for a project. Returns suites with their name, " +
+        "description, and test case count. Use this to discover available test suites " +
+        "before creating a regression run.",
+      inputSchema: {
+        project_id: z.string().describe("The project ID to list suites for"),
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .default(20)
+          .describe("Number of results to return (default: 20, max: 100)"),
+        offset: z
+          .number()
+          .int()
+          .min(0)
+          .default(0)
+          .describe("Offset for pagination (default: 0)"),
+      },
+    },
+    async ({ project_id, limit, offset }) => {
+      const params = new URLSearchParams();
+      params.set("project_id", project_id);
+      params.set("limit", String(limit));
+      params.set("offset", String(offset));
+
+      const result = await api.get<{ suites: RegressionSuite[]; total: number }>(
+        `/regression/suites?${params.toString()}`
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ── get_regression_suite ─────────────────────────────────────────
+  server.registerTool(
+    "get_regression_suite",
+    {
+      title: "Get Regression Suite",
+      description:
+        "Get full details of a regression suite including all its test cases. " +
+        "Returns the suite metadata and an array of test cases with their titles, " +
+        "descriptions, and linked bugs. Use this to understand what a suite covers " +
+        "before starting a regression run.",
+      inputSchema: {
+        suite_id: z.string().describe("The regression suite ID to retrieve"),
+      },
+    },
+    async ({ suite_id }) => {
+      const result = await api.get<RegressionSuite>(
+        `/regression/suites/${suite_id}`
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ── create_regression_run ────────────────────────────────────────
+  server.registerTool(
+    "create_regression_run",
+    {
+      title: "Create Regression Run",
+      description:
+        "Start a new regression run for a suite. A run tracks the execution of test cases " +
+        "and collects pass/fail results. You can optionally specify a subset of test case IDs " +
+        "to run (otherwise all test cases in the suite are included). Set the trigger type to " +
+        "indicate whether this was triggered manually, by a deploy, or by a schedule.",
+      inputSchema: {
+        suite_id: z.string().describe("The regression suite ID to run"),
+        trigger_type: z
+          .enum(["MANUAL", "DEPLOY", "SCHEDULE"])
+          .default("MANUAL")
+          .describe("What triggered this run (default: MANUAL)"),
+        test_case_ids: z
+          .array(z.string())
+          .optional()
+          .describe("Optional subset of test case IDs to include. If omitted, all suite test cases are included"),
+      },
+    },
+    async ({ suite_id, trigger_type, test_case_ids }) => {
+      const body: Record<string, unknown> = {
+        suite_id,
+        trigger_type,
+      };
+      if (test_case_ids) body.test_case_ids = test_case_ids;
+
+      const result = await api.post<RegressionRun>("/regression/runs", body);
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ── submit_test_result ───────────────────────────────────────────
+  server.registerTool(
+    "submit_test_result",
+    {
+      title: "Submit Test Result",
+      description:
+        "Submit a pass/fail result for a specific test case in a regression run. " +
+        "Each test case in a run should have exactly one result submitted. Include " +
+        "evidence URLs (screenshots, recordings) and notes to document the outcome. " +
+        "Duration helps track test execution time trends.",
+      inputSchema: {
+        run_id: z.string().describe("The regression run ID"),
+        test_case_id: z.string().describe("The test case ID being reported on"),
+        result: z
+          .enum(["PASS", "FAIL", "SKIP", "BLOCKED"])
+          .describe("Test result: PASS, FAIL, SKIP, or BLOCKED"),
+        evidence_url: z
+          .string()
+          .url()
+          .optional()
+          .describe("URL to evidence (screenshot, recording, log file)"),
+        notes: z
+          .string()
+          .optional()
+          .describe("Notes about the result — failure details, workarounds, observations"),
+        duration_ms: z
+          .number()
+          .int()
+          .min(0)
+          .optional()
+          .describe("How long the test took to execute in milliseconds"),
+      },
+    },
+    async ({ run_id, test_case_id, result, evidence_url, notes, duration_ms }) => {
+      const body: Record<string, unknown> = {
+        test_case_id,
+        result,
+      };
+      if (evidence_url) body.evidence_url = evidence_url;
+      if (notes) body.notes = notes;
+      if (duration_ms !== undefined) body.duration_ms = duration_ms;
+
+      const res = await api.post<TestResult>(
+        `/regression/runs/${run_id}/results`,
+        body
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(res, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ── get_run_summary ──────────────────────────────────────────────
+  server.registerTool(
+    "get_run_summary",
+    {
+      title: "Get Run Summary",
+      description:
+        "Get a summary of regression run results including pass rate, total/passed/failed/ " +
+        "skipped/blocked counts, and individual test case results. Use this after a run " +
+        "completes to review the overall outcome and identify failures.",
+      inputSchema: {
+        run_id: z.string().describe("The regression run ID to summarize"),
+      },
+    },
+    async ({ run_id }) => {
+      const result = await api.get<RunSummary>(
+        `/regression/runs/${run_id}/summary`
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ═══════════════════════════════════════════════════════════════════
+  // AGENT TOOLS
+  // ═══════════════════════════════════════════════════════════════════
+
+  // ── get_agent_tasks ──────────────────────────────────────────────
+  server.registerTool(
+    "get_agent_tasks",
+    {
+      title: "Get Agent Tasks",
+      description:
+        "List tasks assigned to the current AI agent (identified by the API key). " +
+        "Returns tasks with their type, status, input data, and linked issue. " +
+        "Use status filter to find queued tasks to claim or running tasks to update.",
+      inputSchema: {
+        status: z
+          .enum(["QUEUED", "RUNNING", "COMPLETED", "FAILED"])
+          .optional()
+          .describe("Filter by task status"),
+        limit: z
+          .number()
+          .int()
+          .min(1)
+          .max(100)
+          .default(20)
+          .describe("Number of results to return (default: 20, max: 100)"),
+        offset: z
+          .number()
+          .int()
+          .min(0)
+          .default(0)
+          .describe("Offset for pagination (default: 0)"),
+      },
+    },
+    async ({ status, limit, offset }) => {
+      const params = new URLSearchParams();
+      if (status) params.set("status", status);
+      params.set("limit", String(limit));
+      params.set("offset", String(offset));
+
+      const result = await api.get<{ tasks: AgentTask[]; total: number }>(
+        `/agents/tasks?${params.toString()}`
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ── update_agent_task ────────────────────────────────────────────
+  server.registerTool(
+    "update_agent_task",
+    {
+      title: "Update Agent Task",
+      description:
+        "Update the status of an agent task. Use this to mark a task as RUNNING when you " +
+        "start working on it, COMPLETED when done, or FAILED if something went wrong. " +
+        "Include output data with your results or error details.",
+      inputSchema: {
+        task_id: z.string().describe("The agent task ID to update"),
+        status: z
+          .enum(["RUNNING", "COMPLETED", "FAILED"])
+          .describe("New status for the task"),
+        output: z
+          .record(z.unknown())
+          .optional()
+          .describe("Output data — results on completion, error details on failure"),
+      },
+    },
+    async ({ task_id, status, output }) => {
+      const body: Record<string, unknown> = { status };
+      if (output !== undefined) body.output = output;
+
+      const result = await api.patch<AgentTask>(
+        `/agents/tasks/${task_id}`,
+        body
+      );
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    }
+  );
+
+  // ── claim_agent_task ─────────────────────────────────────────────
+  server.registerTool(
+    "claim_agent_task",
+    {
+      title: "Claim Agent Task",
+      description:
+        "Claim a QUEUED agent task for execution. This atomically transitions the task " +
+        "from QUEUED to RUNNING and assigns it to the current agent. Use get_agent_tasks " +
+        "with status=QUEUED to find available tasks first. If the task is no longer QUEUED " +
+        "(e.g., already claimed by another agent), an error is returned.",
+      inputSchema: {
+        task_id: z.string().describe("The QUEUED agent task ID to claim"),
+      },
+    },
+    async ({ task_id }) => {
+      const result = await api.post<AgentTask>(
+        `/agents/tasks/${task_id}/claim`
       );
       return {
         content: [
