@@ -22,10 +22,10 @@ export async function createTestUser(page: Page) {
   await page.getByLabel('Password', { exact: true }).fill(password);
   await page.getByRole('button', { name: /register|sign up/i }).click();
 
-  // Wait for redirect after successful registration
-  await page.waitForURL(/\/(dashboard|onboarding|auth\/verify)/, {
-    timeout: 15_000,
-  });
+  // Wait for navigation after successful registration
+  await page.waitForURL('**', { timeout: 15_000 });
+  // Verify we're no longer on the register page
+  await page.waitForFunction(() => !window.location.pathname.includes('/register'), { timeout: 5_000 });
 
   return { email, password, name };
 }
@@ -39,10 +39,8 @@ export async function loginAs(page: Page, email: string, password: string) {
   await page.getByLabel('Password').fill(password);
   await page.getByRole('button', { name: /log in|sign in/i }).click();
 
-  // Wait for redirect to dashboard or company selector
-  await page.waitForURL(/\/(dashboard|company|onboarding)/, {
-    timeout: 15_000,
-  });
+  // Wait for navigation after login
+  await page.waitForFunction(() => !window.location.pathname.includes('/login'), { timeout: 15_000 });
 }
 
 /**

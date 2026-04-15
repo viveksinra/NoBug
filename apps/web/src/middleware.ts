@@ -3,8 +3,8 @@ import { getSessionCookie } from 'better-auth/cookies';
 import { getSecurityHeaders } from '@/lib/security-headers';
 import { rateLimit, authLimiter, quickCaptureLimiter } from '@/lib/rate-limit';
 
-const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email'];
-const AUTH_PATHS = ['/login', '/register'];
+const PUBLIC_PATHS = ['/login', '/register', '/forgot-password', '/reset-password', '/verify-email', '/auth/login', '/auth/register', '/auth/forgot-password', '/auth/reset-password', '/auth/verify-email'];
+const AUTH_PATHS = ['/login', '/register', '/auth/login', '/auth/register'];
 
 function getClientIp(request: NextRequest): string {
   return (
@@ -74,7 +74,7 @@ export async function middleware(request: NextRequest) {
   }
 
   // Redirect unauthenticated users to login (except public paths, root, and API routes)
-  if (!sessionCookie && !PUBLIC_PATHS.includes(pathname) && pathname !== '/' && !pathname.startsWith('/api/')) {
+  if (!sessionCookie && !PUBLIC_PATHS.includes(pathname) && pathname !== '/' && !pathname.startsWith('/api/') && !pathname.startsWith('/b/') && !pathname.startsWith('/auth/')) {
     const response = NextResponse.redirect(new URL('/login', request.url));
     applySecurityHeaders(response, isProduction);
     return response;
