@@ -30,6 +30,9 @@
 - Recording message relay pattern: popup → service worker → content script via `browser.tabs.sendMessage`
 - MAIN world scripts use `world: 'MAIN'` in defineContentScript; relay to ISOLATED via `window.postMessage`
 - Console capture at `document_start`, rrweb at `document_idle` — both share same performance.now() time origin
+- S3 uploads use presigned URLs via `@/lib/s3.ts` — extension/client uploads directly to S3, never through backend
+- S3 gracefully no-ops when env vars not set — `isS3Configured()` check, returns null instead of crashing
+- Upload types: recordings, console-logs, network-logs, screenshots, annotated-screenshots — gzip encoding for JSON types
 
 <!-- Example entries to be added during execution:
 - Use `@bugdetector/shared` for all Zod schemas — never duplicate validation logic
@@ -699,3 +702,154 @@
 - apiKey.list/generate/revoke use requirePermission('manage_api_keys') — also needs companyId
 
 ---
+
+### 2026-04-15 — T-044: Jira 2-Way Sync
+
+**Files changed:**
+- `apps/web/src/server/integrations/adapters/jira.ts` — replaced stub with full implementation
+
+**What was implemented:**
+- Full Jira REST API v3 adapter extending BaseAdapter
+- `connect()` — validates credentials via GET /rest/api/3/myself on connect
+- `disconnect()` — delegates to BaseAdapter (clears config/auth)
+- `testConnection()` — calls /rest/api/3/myself, returns user display name
+- `pushIssue()` — creates or updates Jira issues (create via POST, update via PUT); maps priority (CRITICAL/HIGH/MEDIUM/LOW to Highest/High/Medium/Low), converts description to ADF format, sets labels
+- `pullIssue()` — fetches by issue key, maps fields back to IssueSyncData, extracts plain text from ADF descriptions
+- `syncIssueStatus()` — fetches available transitions, finds matching transition by target status name, executes transition
+- `handleWebhook()` — parses Jira webhook events (issue_created, issue_updated, issue_deleted), detects status changes via changelog
+- Dual auth support: cloud (email+apiToken) and server (username+password) via Basic auth header
+- Central `jiraFetch()` helper with auth/content-type headers
+- Bidirectional priority and status mapping with fallback defaults
+- Uses BaseAdapter's `withRetry()` for transient error resilience (429 rate limits)
+
+**Learnings:**
+- Jira Cloud requires ADF (Atlassian Document Format) for description fields — simple doc/paragraph/text structure
+- Jira status changes require transitions, not direct field updates — must query available transitions first
+- Jira status categories (new/indeterminate/done) are more reliable for mapping than status names (which are customizable per project)
+
+---
+
+### 2026-04-15 — T-046: Slack 2-Way Notifications
+
+**Files changed:**
+- `apps/web/src/server/integrations/adapters/slack.ts` — replaced stub with full implementation
+
+**What was implemented:**
+- Full Slack Web API adapter extending BaseAdapter using native fetch()
+- `connect()` — validates bot token via auth.test, logs team/bot_id
+- `disconnect()` — delegates to BaseAdapter
+- `testConnection()` — calls auth.test with retry, returns bot user name
+- `pushIssue()` — posts rich Block Kit messages (header, section fields for priority/status, assignee, description excerpt, divider, actions with View Bug button, context timestamp); updates existing messages via chat.update when externalId present in metadata; uses colored attachments for priority sidebar
+- `pullIssue()` — returns minimal data (notification-only provider)
+- `syncIssueStatus()` — posts threaded reply on original message with status emoji and text
+- `handleWebhook()` — validates Slack signing secret headers (timestamp freshness, v0= format), handles url_verification challenge, block_actions for View Bug button clicks, /bugdetector slash command (help text or create_bug_from_slash action)
+- Priority colors: CRITICAL=#ef4444, HIGH=#f97316, MEDIUM=#eab308, LOW=#3b82f6
+- Status emojis for all issue states (OPEN, IN_PROGRESS, IN_REVIEW, RESOLVED, CLOSED, BACKLOG)
+- Slack archive URL builder for message permalinks
+- Rate limit detection (ok:false + error:ratelimited) triggers retryable error
+
+**Learnings:**
+- Slack returns HTTP 200 even for auth errors — must check response.ok field in JSON body
+- Block Kit blocks go inside attachments (not top-level) when using colored sidebar
+- Slack message permalinks use /archives/{channel}/p{ts_without_dot} format
+- Full HMAC signature verification requires raw request body string — best done at route handler level, adapter validates structural requirements
+
+---
+
+### 2026-04-15 — T-043: GitHub Issues 2-Way Sync
+
+**Files changed:**
+- `apps/web/src/server/integrations/adapters/github.ts` — full implementation replacing stub
+- `apps/web/package.json` — added `@octokit/rest` dependency
+
+**What was implemented:**
+- **connect** — validates GitHub token via `GET /user`, creates Octokit instance
+- **disconnect** — clears Octokit instance, delegates to BaseAdapter
+- **testConnection** — calls `GET /user`, returns login name on success
+- **pushIssue** — creates or updates GitHub issues; maps BugDetector status to GitHub state (open/closed) with status labels for intermediate states; maps priority to labels (priority:critical/high/medium/low); supports update via `metadata.githubIssueNumber`
+- **pullIssue** — fetches GitHub issue by number, reverse-maps labels back to BugDetector status/priority
+- **syncIssueStatus** — updates GitHub issue state and swaps status labels atomically
+- **handleWebhook** — HMAC-SHA256 signature verification with `X-Hub-Signature-256`, handles issues events (opened/closed/reopened/edited/labeled)
+
+**Learnings:**
+- GitHub issues only have two states (open/closed) — intermediate BugDetector statuses must be mapped via labels
+- Webhook signature verification uses `timingSafeEqual` for constant-time comparison to prevent timing attacks
+- GitHub issue creation always creates in "open" state — must follow up with a PATCH to close if target state is "closed"
+
+---
+
+## [2026-04-15] — Task T-053: GDPR Data Retention and Consent
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/lib/data-retention.ts (created — retention cleanup utilities)
+- apps/web/src/server/routers/gdpr.ts (created — GDPR tRPC router with 7 procedures)
+
+**What was implemented:**
+- Data retention utility with 3 functions: cleanupExpiredCaptures, cleanupOldRecordings, anonymizeClosedIssues
+- GDPR router with 7 procedures:
+  - exportUserData: exports all user data (profile, memberships, issues, comments, recordings, screenshots, captures, notifications, sessions, activity logs, invitations) via Promise.all
+  - deleteAccount: password-verified via better-auth/crypto verifyPassword, cascading deletion in transaction (anonymize issues/comments, delete recordings/screenshots/captures/notifications/activity/memberships/sessions/accounts/user)
+  - getRetentionPolicy: reads latest RETENTION_POLICY_SET ActivityLog for company
+  - updateRetentionPolicy: stores policy as ActivityLog entry (recording retention days, auto-delete captures, anonymize closed issues days)
+  - runRetentionCleanup: manually triggers all 3 retention utility functions based on company policy
+  - getConsentLog: paginated consent audit trail from ActivityLog
+  - recordConsent: records CONSENT_GIVEN/CONSENT_REVOKED events with consent type enum
+
+**Learnings:**
+- Better Auth exports verifyPassword from `better-auth/crypto` (not `better-auth/crypto/password`)
+- requirePermission() already chains off companyProcedure which includes companyId input — do not add redundant companyId input
+- Retention policy stored as ActivityLog entries (action=RETENTION_POLICY_SET) avoids schema changes — latest entry wins
+
+---
+
+## [2026-04-15] — Task T-047: Webhooks and CI/CD Deploy Hooks
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/lib/webhook-sender.ts (new — webhook delivery utility with HMAC-SHA256 signing, retry logic)
+- apps/web/src/server/routers/webhook.ts (new — tRPC router with 6 procedures + dispatchWebhooks helper)
+- apps/web/src/app/api/webhooks/deploy/route.ts (new — inbound deploy hook REST endpoint)
+- STATUS.json (updated)
+
+**What was implemented:**
+- `webhook-sender.ts`: `sendWebhook()` with HMAC-SHA256 signature in `X-NoBug-Signature` header, 3 retries with exponential backoff (1s/5s/30s), 10s timeout per attempt, delivery attempt logging
+- `webhookRouter`: create (generates `whsec_` secret), list, update (url/events/enabled), delete, test (sends test.ping), listDeliveries (last 50 deliveries stored in config_json)
+- Webhook config stored in Integration model with provider=WEBHOOK, config_json holds url/secret/events/enabled/deliveries
+- `dispatchWebhooks()` exported helper: fire-and-forget delivery to all subscribed webhooks for a company+event
+- Deploy hook at `/api/webhooks/deploy`: authenticates via `X-Deploy-Secret` header matched against company webhook integration's `deploy_hook_secret`, creates ActivityLog entry, triggers DEPLOY_WEBHOOK regression runs for all company suites, dispatches `deploy.completed` webhook
+- Supported events: issue.created/updated/status_changed/assigned, comment.created, capture.created, regression.run_completed, deploy.completed
+
+**Learnings:**
+- Webhook delivery logs stored as JSON array in Integration.config_json (capped at 50 entries) avoids needing a separate table
+- Deploy hook uses Integration config_json.deploy_hook_secret field for auth, separate from the webhook signing secret
+
+## [2026-04-15] — Task T-031: S3 Upload Pipeline and Media Storage
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/lib/s3.ts (created — S3 client singleton, presigned URL generation, public URL helper)
+- apps/web/src/server/routers/upload.ts (created — tRPC router with requestUploadUrl, confirmUpload, getDownloadUrl)
+- apps/web/src/app/api/extension/upload/route.ts (created — REST endpoint mirroring tRPC for extension)
+- apps/web/src/server/routers/_app.ts (modified — registered upload router)
+- apps/web/.env.example (modified — added AWS S3 env vars)
+- apps/web/package.json (modified — added @aws-sdk/client-s3, @aws-sdk/s3-request-presigner)
+
+**What was implemented:**
+- S3 client singleton (`getClient()`) initialized from env vars, returns null when not configured (graceful local dev)
+- `isS3Configured()` check used by all functions to no-op safely
+- `generateUploadUrl()` creates presigned PUT URLs (15 min expiry) with content-type and gzip encoding for JSON types
+- `generateDownloadUrl()` creates presigned GET URLs (1 hour expiry)
+- `getPublicUrl()` for Quick Capture viewer (public-read pattern)
+- `buildObjectKey()` creates S3 keys: `{env}/{companyId}/{type}/{fileId}.{ext}` (with `.gz` suffix for gzip types)
+- tRPC `upload.requestUploadUrl` validates size limits from @nobug/shared, generates presigned URL + download URL
+- tRPC `upload.confirmUpload` creates Recording/Screenshot DB records, updates QuickCapture URLs for console/network logs
+- tRPC `upload.getDownloadUrl` returns fresh presigned download URL
+- REST POST `/api/extension/upload` mirrors requestUploadUrl with session cookie + API key auth
+- UploadType: recordings, console-logs, network-logs, screenshots, annotated-screenshots
+
+**Learnings:**
+- S3 presigned URLs bypass the backend entirely — extension/client uploads directly to S3
+- Gzip content-encoding set only for JSON-based types (recordings, console-logs, network-logs)
+- Prisma JSON fields need explicit `as Prisma.InputJsonValue` cast for `z.record(z.unknown())` inputs
+- REST extension endpoint validates same size limits as tRPC to prevent bypassing
