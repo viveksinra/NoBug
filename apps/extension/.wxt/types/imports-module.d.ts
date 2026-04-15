@@ -20,6 +20,7 @@ declare module '#imports' {
   export { fakeBrowser } from 'wxt/testing';
   export { AnnotationEditor } from '../src/components/AnnotationEditor';
   export { ConsentDialog } from '../src/components/ConsentDialog';
+  export { FullCapture } from '../src/components/FullCapture';
   export { FullMode } from '../src/components/FullMode';
   export { NoCompany } from '../src/components/NoCompany';
   export { NotLoggedIn } from '../src/components/NotLoggedIn';

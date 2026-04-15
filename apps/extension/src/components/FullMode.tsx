@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import type { AuthState } from '@/lib/types';
 import { useRecording } from '@/lib/useRecording';
-import { performCapture } from '@/lib/capture';
 import { QuickCapture } from './QuickCapture';
+import { FullCapture } from './FullCapture';
 import { APP_URL } from '@/lib/constants';
 
 interface Props {
@@ -79,20 +79,7 @@ function MainPanel({ authState }: { authState: AuthState }) {
   const { state: recording, startManualRecording, stopManualRecording } =
     useRecording();
   const [showQuickCapture, setShowQuickCapture] = useState(false);
-  const [capturing, setCapturing] = useState(false);
-
-  const handleCaptureBug = async () => {
-    setCapturing(true);
-    try {
-      const bundle = await performCapture();
-      // Store for full platform submission (T-030)
-      await browser.storage.local.set({ nobug_capture_bundle: JSON.stringify(bundle) });
-      console.log(`[NoBug] Captured: ${bundle.events.length} events, ${bundle.consoleLogs.length} logs, ${bundle.networkLogs.length} requests`);
-    } catch (err) {
-      console.error('[NoBug] Capture failed:', err);
-    }
-    setCapturing(false);
-  };
+  const [showFullCapture, setShowFullCapture] = useState(false);
 
   const handleManualToggle = async () => {
     if (recording.mode === 'manual') {
@@ -105,19 +92,23 @@ function MainPanel({ authState }: { authState: AuthState }) {
   const activeSlug =
     authState.companies.find((c) => c.id === authState.activeCompanyId)?.slug ?? '';
 
+  if (showFullCapture) {
+    return <FullCapture authState={authState} onBack={() => setShowFullCapture(false)} />;
+  }
+
   if (showQuickCapture) {
     return <QuickCapture onBack={() => setShowQuickCapture(false)} />;
   }
 
   return (
     <>
-      {/* Capture Bug button — Full Platform flow (T-030) */}
+      {/* Capture Bug button — Full Platform flow */}
       <button
         className="w-full py-2.5 px-4 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary-hover transition-colors disabled:opacity-50"
-        onClick={handleCaptureBug}
-        disabled={capturing || !recording.isRecording}
+        onClick={() => setShowFullCapture(true)}
+        disabled={!recording.isRecording}
       >
-        {capturing ? 'Capturing...' : 'Capture Bug'}
+        Capture Bug
       </button>
 
       {/* Quick Capture — shareable link */}

@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
   // Get members
   const members = await db.member.findMany({
     where: { company_id: companyId },
-    include: { user: { select: { id: true, name: true, email: true, image: true } } },
+    include: { user: { select: { id: true, name: true, email: true, avatar_url: true } } },
   });
 
   // Get agents
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
       type: 'MEMBER' as const,
       name: m.user.name,
       email: m.user.email,
-      avatar_url: m.user.image,
+      avatar_url: m.user.avatar_url,
     })),
     ...agents.map((a) => ({
       id: a.id,

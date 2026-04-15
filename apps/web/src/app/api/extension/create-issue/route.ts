@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
         data: {
           agent_id: assigneeId,
           company_id: project.company_id,
-          task_type: 'FIX_BUG',
+          task_type: 'BUG_ANALYSIS',
           entity_type: 'ISSUE',
           entity_id: newIssue.id,
         },

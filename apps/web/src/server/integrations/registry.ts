@@ -3,6 +3,7 @@ import type { IntegrationAdapter } from './types';
 import { GitHubAdapter } from './adapters/github';
 import { JiraAdapter } from './adapters/jira';
 import { SlackAdapter } from './adapters/slack';
+import { AzureDevOpsAdapter } from './adapters/azure-devops';
 
 // ============================================================================
 // Adapter Registry — maps provider names to adapter factory functions
@@ -14,6 +15,7 @@ const adapterFactories: Partial<Record<IntegrationProvider, AdapterFactory>> = {
   GITHUB: () => new GitHubAdapter(),
   JIRA: () => new JiraAdapter(),
   SLACK: () => new SlackAdapter(),
+  AZURE_DEVOPS: () => new AzureDevOpsAdapter(),
 };
 
 /**

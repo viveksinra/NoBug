@@ -4,6 +4,7 @@ declare global {
   const AnnotationEditor: typeof import('D:/Projects/BugDetector/apps/extension/src/components/AnnotationEditor').AnnotationEditor
   const ConsentDialog: typeof import('D:/Projects/BugDetector/apps/extension/src/components/ConsentDialog').ConsentDialog
   const ContentScriptContext: typeof import('wxt/utils/content-script-context').ContentScriptContext
+  const FullCapture: typeof import('D:/Projects/BugDetector/apps/extension/src/components/FullCapture').FullCapture
   const FullMode: typeof import('D:/Projects/BugDetector/apps/extension/src/components/FullMode').FullMode
   const InvalidMatchPattern: typeof import('wxt/utils/match-patterns').InvalidMatchPattern
   const MatchPattern: typeof import('wxt/utils/match-patterns').MatchPattern

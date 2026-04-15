@@ -14,6 +14,7 @@ const globals = {
   "ContentScriptPositioningOptions": true,
   "ContentScriptUi": true,
   "ContentScriptUiOptions": true,
+  "FullCapture": true,
   "FullMode": true,
   "IframeContentScriptUi": true,
   "IframeContentScriptUiOptions": true,
