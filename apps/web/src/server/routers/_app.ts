@@ -6,6 +6,7 @@ import { agentRouter } from './agent';
 import { issueRouter } from './issue';
 import { notificationRouter } from './notification';
 import { quickCaptureRouter } from './quick-capture';
+import { regressionRouter } from './regression';
 
 export const appRouter = router({
   company: companyRouter,
@@ -15,6 +16,7 @@ export const appRouter = router({
   issue: issueRouter,
   notification: notificationRouter,
   quickCapture: quickCaptureRouter,
+  regression: regressionRouter,
 });
 
 export type AppRouter = typeof appRouter;

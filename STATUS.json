@@ -1,10 +1,10 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-15T00:00:00Z",
-  "last_task_completed": "T-029",
+  "last_updated": "2026-04-15T12:00:00Z",
+  "last_task_completed": "T-048",
   "total_tasks": 55,
-  "completed": 29,
+  "completed": 32,
   "in_progress": null,
   "blocked": [],
   "tasks": [
@@ -84,13 +84,13 @@
       "id": "T-007",
       "phase": "1A",
       "title": "Better Auth -- Password Reset and Email Verification",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T00:00:00Z",
+      "completed_at": "2026-04-15T00:15:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-006"],
-      "notes": ""
+      "notes": "Resend email client with password reset and verification templates. Graceful fallback when RESEND_API_KEY not set."
     },
     {
       "id": "T-008",
@@ -468,13 +468,13 @@
       "id": "T-039",
       "phase": "1F",
       "title": "MCP Server Package -- Core Bug Tools",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T12:00:00Z",
+      "completed_at": "2026-04-15T12:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-012"],
-      "notes": ""
+      "notes": "MCP server with 6 tools (list_bugs, get_bug, create_bug, update_bug, add_comment, search_bugs). Uses McpServer + StdioServerTransport from @modelcontextprotocol/sdk v1.29. ApiClient calls /api/v1/* REST endpoints with Bearer API key auth. Package executable via npx @nobug/mcp-server."
     },
     {
       "id": "T-040",
@@ -576,13 +576,13 @@
       "id": "T-048",
       "phase": "1H",
       "title": "Regression Suite and Test Case CRUD",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T12:00:00Z",
+      "completed_at": "2026-04-15T12:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-004", "T-011"],
-      "notes": ""
+      "notes": "Regression router with 11 procedures: suiteCreate/List/GetById/Update/Delete + testCaseCreate/List/GetById/Update/LinkBug/UnlinkBug. Uses requirePermission('manage_projects') for writes, companyProcedure for reads. Company ownership validated via project relation chain."
     },
     {
       "id": "T-049",

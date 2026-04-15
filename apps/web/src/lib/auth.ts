@@ -1,6 +1,10 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
 import { db } from '@nobug/db';
+import {
+  sendPasswordResetEmail,
+  sendVerificationEmail,
+} from './email';
 
 export const auth = betterAuth({
   database: prismaAdapter(db, {
@@ -11,16 +15,16 @@ export const auth = betterAuth({
     minPasswordLength: 8,
     maxPasswordLength: 128,
     sendResetPassword: async ({ user, url }) => {
-      // TODO: Send reset password email via Resend (T-007)
       console.log(`[Auth] Reset password for ${user.email}: ${url}`);
+      await sendPasswordResetEmail(user.email, url);
     },
   },
   emailVerification: {
     sendOnSignUp: true,
     autoSignInAfterVerification: true,
     sendVerificationEmail: async ({ user, url }) => {
-      // TODO: Send verification email via Resend (T-007)
       console.log(`[Auth] Verify email for ${user.email}: ${url}`);
+      await sendVerificationEmail(user.email, url);
     },
   },
   session: {

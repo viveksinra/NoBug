@@ -438,3 +438,77 @@
 - Environment detection must run in content script context (has access to window/document), not service worker
 
 ---
+
+## 2026-04-15 — T-007: Better Auth — Password Reset and Email Verification
+
+**Files changed:**
+- `apps/web/src/lib/email.ts` (NEW) — Resend client, sendEmail, sendPasswordResetEmail, sendVerificationEmail
+- `apps/web/src/lib/auth.ts` — Import email functions, replace TODO console.logs with actual email sending
+- `apps/web/package.json` — Added `resend` dependency
+
+**What was implemented:**
+- Resend email client initialized from `RESEND_API_KEY` env var
+- `sendEmail()` generic function with graceful fallback (console.warn) when API key not set
+- `sendPasswordResetEmail(to, resetUrl)` — branded HTML template with reset button
+- `sendVerificationEmail(to, verifyUrl)` — branded HTML template with verify button
+- From address configurable via `EMAIL_FROM` env (default: `noreply@bugdetector.io`)
+- auth.ts updated to call email functions while keeping console.log for dev observability
+- Typecheck passes clean
+
+**Learnings:**
+- Resend client returns `{ error }` on failure — check and throw for proper error propagation
+- Keep console.log alongside email send (not as fallback) for server-side observability in dev
+
+---
+
+## 2026-04-15 — T-048: Regression Suite and Test Case CRUD
+
+**Files created:**
+- `apps/web/src/server/routers/regression.ts`
+
+**Files modified:**
+- `STATUS.json` — marked T-048 completed
+
+**What was implemented:**
+- `regressionRouter` with 11 tRPC procedures:
+  - Suite: `suiteCreate`, `suiteList`, `suiteGetById`, `suiteUpdate`, `suiteDelete`
+  - TestCase: `testCaseCreate`, `testCaseList`, `testCaseGetById`, `testCaseUpdate`, `testCaseLinkBug`, `testCaseUnlinkBug`
+- Write operations use `requirePermission('manage_projects')`, reads use `companyProcedure`
+- Company ownership validated by traversing suite → project → company_id chain
+- Suite list includes `_count` for test_cases and runs
+- Test case list supports filters: tier, priority, folder, automated, search
+- Test case getById includes bug_links with issue details and assignments
+- Bug link requires `foundInRunId` (required by Prisma schema's `TestCaseBugLink.found_in_run_id`)
+- Duplicate link prevention on `testCaseLinkBug`
+
+**Learnings:**
+- RegressionSuite model in Prisma does NOT have `tier` or `archived` fields — task description mentioned them but actual schema differs. Adapted accordingly: no tier on suite, hard delete instead of soft delete.
+- TestCaseBugLink requires `found_in_run_id` (relation to RegressionRun), so linkBug needs a run context.
+
+---
+
+## [2026-04-15] — Task T-039: MCP Server Package — Core Bug Tools
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- packages/mcp-server/package.json (updated — added type:module, exports, bin, engines, keywords, @modelcontextprotocol/sdk + zod deps, @types/node devDep)
+- packages/mcp-server/tsconfig.json (updated — explicit module/target for ESM)
+- packages/mcp-server/src/index.ts (rewritten — McpServer setup with StdioServerTransport, startServer export, CLI entry point)
+- packages/mcp-server/src/api-client.ts (created — HTTP client with Bearer auth, error handling for 401/403/404)
+- packages/mcp-server/src/tools.ts (created — 6 MCP tools: list_bugs, get_bug, create_bug, update_bug, add_comment, search_bugs)
+
+**What was implemented:**
+- MCP server using `McpServer` from `@modelcontextprotocol/sdk` v1.29 with `StdioServerTransport`
+- `ApiClient` class that reads `NOBUG_API_KEY` (nb_key_ prefix) and `NOBUG_API_URL` from env vars
+- All 6 bug tools registered via `registerTool()` with Zod input schemas and detailed AI-friendly descriptions
+- Tools call `/api/v1/*` REST endpoints (to be implemented in T-041)
+- Package is executable via `npx @nobug/mcp-server` with shebang in dist/index.js
+- Exports `createServer()` and `startServer()` for programmatic use
+
+**Learnings:**
+- MCP SDK v1.29 uses `registerTool()` (not deprecated `tool()`) with config object: `{ title, description, inputSchema, outputSchema, annotations }`
+- `inputSchema` accepts Zod raw shapes (object with z.string(), z.number(), etc.) — NOT z.object()
+- MCP SDK is ESM-only (`"type": "module"` required), needs `.js` extensions in imports
+- `StdioServerTransport` is in `@modelcontextprotocol/sdk/server/stdio.js` (subpath export)
+
+---
