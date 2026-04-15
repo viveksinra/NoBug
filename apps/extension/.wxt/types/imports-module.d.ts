@@ -23,4 +23,5 @@ declare module '#imports' {
   export { FullMode } from '../src/components/FullMode';
   export { NoCompany } from '../src/components/NoCompany';
   export { NotLoggedIn } from '../src/components/NotLoggedIn';
+  export { QuickCapture } from '../src/components/QuickCapture';
 }

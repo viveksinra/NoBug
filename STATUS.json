@@ -1,10 +1,10 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-14T17:00:00Z",
-  "last_task_completed": "T-028",
+  "last_updated": "2026-04-15T00:00:00Z",
+  "last_task_completed": "T-029",
   "total_tasks": 55,
-  "completed": 28,
+  "completed": 29,
   "in_progress": null,
   "blocked": [],
   "tasks": [
@@ -348,13 +348,13 @@
       "id": "T-029",
       "phase": "1C",
       "title": "Quick Capture Flow (Zero Friction)",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-14T17:00:00Z",
+      "completed_at": "2026-04-15T00:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-024", "T-025", "T-026", "T-027", "T-028"],
-      "notes": ""
+      "notes": "Full capture orchestrator: rrweb + console + network + screenshot + environment + PII redaction. QuickCapture tRPC + REST endpoints. Multi-state popup UI (idle/capturing/form/uploading/success/error). Shareable link with copy button. Password protection. Expiry rules (24h anon, 30d free). Environment auto-detection (browser, OS, viewport, framework)."
     },
     {
       "id": "T-030",

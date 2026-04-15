@@ -9,6 +9,7 @@ declare global {
   const MatchPattern: typeof import('wxt/utils/match-patterns').MatchPattern
   const NoCompany: typeof import('D:/Projects/BugDetector/apps/extension/src/components/NoCompany').NoCompany
   const NotLoggedIn: typeof import('D:/Projects/BugDetector/apps/extension/src/components/NotLoggedIn').NotLoggedIn
+  const QuickCapture: typeof import('D:/Projects/BugDetector/apps/extension/src/components/QuickCapture').QuickCapture
   const browser: typeof import('wxt/browser').browser
   const createIframeUi: typeof import('wxt/utils/content-script-ui/iframe').createIframeUi
   const createIntegratedUi: typeof import('wxt/utils/content-script-ui/integrated').createIntegratedUi

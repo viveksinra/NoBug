@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { APP_URL } from '@/lib/constants';
+import { QuickCapture } from './QuickCapture';
 
 interface Props {
   onLogin: () => void;
@@ -7,6 +8,7 @@ interface Props {
 }
 
 export function NotLoggedIn({ onLogin, onApiKeyLogin }: Props) {
+  const [showQuickCapture, setShowQuickCapture] = useState(false);
   const [showApiKey, setShowApiKey] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [error, setError] = useState('');
@@ -33,14 +35,16 @@ export function NotLoggedIn({ onLogin, onApiKeyLogin }: Props) {
       </div>
 
       {/* Quick Capture — always available */}
-      <button
-        className="w-full py-2.5 px-4 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary-hover transition-colors"
-        onClick={() => {
-          // Quick capture doesn't need auth — will be implemented in T-029
-        }}
-      >
-        Quick Capture
-      </button>
+      {showQuickCapture ? (
+        <QuickCapture onBack={() => setShowQuickCapture(false)} />
+      ) : (
+        <button
+          className="w-full py-2.5 px-4 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary-hover transition-colors"
+          onClick={() => setShowQuickCapture(true)}
+        >
+          Quick Capture
+        </button>
+      )}
 
       <div className="border-t border-border" />
 

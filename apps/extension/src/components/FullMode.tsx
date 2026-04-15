@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import type { AuthState } from '@/lib/types';
 import { useRecording } from '@/lib/useRecording';
+import { performCapture } from '@/lib/capture';
+import { QuickCapture } from './QuickCapture';
 import { APP_URL } from '@/lib/constants';
 
 interface Props {
@@ -74,27 +76,27 @@ export function FullMode({
 }
 
 function MainPanel({ authState }: { authState: AuthState }) {
-  const { state: recording, captureBuffer, startManualRecording, stopManualRecording } =
+  const { state: recording, startManualRecording, stopManualRecording } =
     useRecording();
+  const [showQuickCapture, setShowQuickCapture] = useState(false);
   const [capturing, setCapturing] = useState(false);
 
   const handleCaptureBug = async () => {
     setCapturing(true);
-    const result = await captureBuffer();
-    setCapturing(false);
-
-    if (result?.events?.length) {
-      // Store captured events temporarily — full submission flow in T-030
-      console.log(`[NoBug] Captured ${result.events.length} rrweb events`);
+    try {
+      const bundle = await performCapture();
+      // Store for full platform submission (T-030)
+      await browser.storage.local.set({ nobug_capture_bundle: JSON.stringify(bundle) });
+      console.log(`[NoBug] Captured: ${bundle.events.length} events, ${bundle.consoleLogs.length} logs, ${bundle.networkLogs.length} requests`);
+    } catch (err) {
+      console.error('[NoBug] Capture failed:', err);
     }
+    setCapturing(false);
   };
 
   const handleManualToggle = async () => {
     if (recording.mode === 'manual') {
-      const result = await stopManualRecording();
-      if (result?.events?.length) {
-        console.log(`[NoBug] Manual recording: ${result.events.length} events`);
-      }
+      await stopManualRecording();
     } else {
       await startManualRecording();
     }
@@ -103,9 +105,13 @@ function MainPanel({ authState }: { authState: AuthState }) {
   const activeSlug =
     authState.companies.find((c) => c.id === authState.activeCompanyId)?.slug ?? '';
 
+  if (showQuickCapture) {
+    return <QuickCapture onBack={() => setShowQuickCapture(false)} />;
+  }
+
   return (
     <>
-      {/* Capture Bug button */}
+      {/* Capture Bug button — Full Platform flow (T-030) */}
       <button
         className="w-full py-2.5 px-4 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary-hover transition-colors disabled:opacity-50"
         onClick={handleCaptureBug}
@@ -114,12 +120,20 @@ function MainPanel({ authState }: { authState: AuthState }) {
         {capturing ? 'Capturing...' : 'Capture Bug'}
       </button>
 
+      {/* Quick Capture — shareable link */}
+      <button
+        className="w-full py-2 px-4 rounded-lg bg-surface border border-border text-text font-medium text-sm hover:bg-surface-hover hover:border-border-hover transition-colors"
+        onClick={() => setShowQuickCapture(true)}
+      >
+        Quick Capture
+      </button>
+
       {/* Manual recording toggle */}
       <button
-        className={`w-full py-2 px-4 rounded-lg border font-medium text-sm transition-colors ${
+        className={`w-full py-1.5 px-4 rounded-lg border font-medium text-xs transition-colors ${
           recording.mode === 'manual'
             ? 'bg-error/10 border-error/30 text-error hover:bg-error/20'
-            : 'bg-surface border-border text-text hover:bg-surface-hover hover:border-border-hover'
+            : 'bg-surface border-border text-text-secondary hover:bg-surface-hover hover:border-border-hover'
         }`}
         onClick={handleManualToggle}
       >

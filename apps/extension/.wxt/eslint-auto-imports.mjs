@@ -25,6 +25,7 @@ const globals = {
   "MigrationError": true,
   "NoCompany": true,
   "NotLoggedIn": true,
+  "QuickCapture": true,
   "ScriptPublicPath": true,
   "ShadowRootContentScriptUi": true,
   "ShadowRootContentScriptUiOptions": true,

@@ -5,6 +5,7 @@ import { apiKeyRouter } from './api-key';
 import { agentRouter } from './agent';
 import { issueRouter } from './issue';
 import { notificationRouter } from './notification';
+import { quickCaptureRouter } from './quick-capture';
 
 export const appRouter = router({
   company: companyRouter,
@@ -13,6 +14,7 @@ export const appRouter = router({
   agent: agentRouter,
   issue: issueRouter,
   notification: notificationRouter,
+  quickCapture: quickCaptureRouter,
 });
 
 export type AppRouter = typeof appRouter;

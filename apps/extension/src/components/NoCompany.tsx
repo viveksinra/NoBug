@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { APP_URL } from '@/lib/constants';
 import type { AuthState } from '@/lib/types';
+import { QuickCapture } from './QuickCapture';
 
 interface Props {
   authState: AuthState;
@@ -8,6 +9,8 @@ interface Props {
 }
 
 export function NoCompany({ authState, onLogout }: Props) {
+  const [showQuickCapture, setShowQuickCapture] = useState(false);
+
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
@@ -26,14 +29,16 @@ export function NoCompany({ authState, onLogout }: Props) {
       </div>
 
       {/* Quick Capture — always available */}
-      <button
-        className="w-full py-2.5 px-4 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary-hover transition-colors"
-        onClick={() => {
-          // Quick capture — T-029
-        }}
-      >
-        Quick Capture
-      </button>
+      {showQuickCapture ? (
+        <QuickCapture onBack={() => setShowQuickCapture(false)} />
+      ) : (
+        <button
+          className="w-full py-2.5 px-4 rounded-lg bg-primary text-white font-medium text-sm hover:bg-primary-hover transition-colors"
+          onClick={() => setShowQuickCapture(true)}
+        >
+          Quick Capture
+        </button>
+      )}
 
       <div className="border-t border-border" />
 

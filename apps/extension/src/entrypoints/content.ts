@@ -6,6 +6,7 @@ import { MAX_LOG_ENTRIES } from '@/lib/console-types';
 import type { NetworkEntry, NetworkPostMessage } from '@/lib/network-types';
 import { MAX_NETWORK_ENTRIES } from '@/lib/network-types';
 import { hasConsent } from '@/lib/consent';
+import { collectEnvironment } from '@/lib/environment';
 
 export default defineContentScript({
   matches: ['<all_urls>'],
@@ -216,6 +217,11 @@ export default defineContentScript({
         case 'CLEAR_NETWORK_LOGS': {
           networkLogs.length = 0;
           sendResponse({ ok: true });
+          return;
+        }
+
+        case 'GET_ENVIRONMENT': {
+          sendResponse(collectEnvironment());
           return;
         }
       }

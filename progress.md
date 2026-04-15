@@ -404,3 +404,37 @@
 - Consent check in content script uses async main() — WXT supports this in defineContentScript
 
 ---
+
+## [2026-04-15] — Task T-029: Quick Capture Flow (Zero Friction)
+**Status:** completed
+**Iteration:** 1
+**Files Changed:**
+- apps/web/src/server/routers/quick-capture.ts (created — QuickCapture tRPC router)
+- apps/web/src/server/routers/_app.ts (modified — added quickCapture router)
+- apps/web/src/app/api/extension/quick-capture/route.ts (created — REST endpoint for extension)
+- apps/extension/src/lib/environment.ts (created — auto-detect browser, OS, viewport, framework)
+- apps/extension/src/lib/capture.ts (created — capture orchestrator + submitQuickCapture)
+- apps/extension/src/components/QuickCapture.tsx (created — multi-state Quick Capture UI)
+- apps/extension/src/components/NotLoggedIn.tsx (modified — integrated QuickCapture)
+- apps/extension/src/components/NoCompany.tsx (modified — integrated QuickCapture)
+- apps/extension/src/components/FullMode.tsx (modified — integrated QuickCapture + performCapture)
+- apps/extension/src/entrypoints/content.ts (modified — added GET_ENVIRONMENT handler)
+
+**What Was Implemented:**
+- Capture orchestrator: snapshots rrweb buffer + console + network + screenshot + environment in one call
+- PII redaction applied to all captured data before upload
+- Environment auto-detection: URL, browser/version, OS, viewport, devicePixelRatio, framework (Next.js, React, Vue, Angular, Svelte, Astro, Nuxt)
+- QuickCapture tRPC router: create (public, anon allowed), getBySlug (with password/expiry check), list (user's captures)
+- REST endpoint /api/extension/quick-capture for direct extension calls
+- Multi-state popup UI: idle → capturing → form → uploading → success/error
+- Form with optional title/description, capture summary badges, environment preview
+- Password protection toggle, shareable link with copy button
+- Expiry rules: 24hr anonymous, 30 days free signed-in
+- Quick Capture accessible from all 3 popup modes (not logged in, no company, full)
+
+**Learnings:**
+- Prisma Json fields need `as any` cast for `Record<string, unknown>` — TypeScript strict mode doesn't like the union type
+- REST API endpoint needed alongside tRPC for extension (cross-origin direct fetch is simpler than setting up tRPC client in extension)
+- Environment detection must run in content script context (has access to window/document), not service worker
+
+---
