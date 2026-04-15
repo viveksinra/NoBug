@@ -15,6 +15,7 @@ import { uploadRouter } from './upload';
 import { gdprRouter } from './gdpr';
 import { webhookRouter } from './webhook';
 import { shareRouter } from './share';
+import { testingWorkflowRouter } from './testing-workflow';
 
 export const appRouter = router({
   company: companyRouter,
@@ -33,6 +34,7 @@ export const appRouter = router({
   gdpr: gdprRouter,
   webhook: webhookRouter,
   share: shareRouter,
+  testingWorkflow: testingWorkflowRouter,
 });
 
 export type AppRouter = typeof appRouter;

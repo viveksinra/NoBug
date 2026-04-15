@@ -3,6 +3,7 @@ import type { AuthState } from '@/lib/types';
 import { useRecording } from '@/lib/useRecording';
 import { QuickCapture } from './QuickCapture';
 import { FullCapture } from './FullCapture';
+import { AttachToIssue } from './AttachToIssue';
 import { APP_URL } from '@/lib/constants';
 
 interface Props {
@@ -80,6 +81,7 @@ function MainPanel({ authState }: { authState: AuthState }) {
     useRecording();
   const [showQuickCapture, setShowQuickCapture] = useState(false);
   const [showFullCapture, setShowFullCapture] = useState(false);
+  const [showAttachToIssue, setShowAttachToIssue] = useState(false);
 
   const handleManualToggle = async () => {
     if (recording.mode === 'manual') {
@@ -94,6 +96,10 @@ function MainPanel({ authState }: { authState: AuthState }) {
 
   if (showFullCapture) {
     return <FullCapture authState={authState} onBack={() => setShowFullCapture(false)} />;
+  }
+
+  if (showAttachToIssue) {
+    return <AttachToIssue authState={authState} onBack={() => setShowAttachToIssue(false)} />;
   }
 
   if (showQuickCapture) {
@@ -117,6 +123,15 @@ function MainPanel({ authState }: { authState: AuthState }) {
         onClick={() => setShowQuickCapture(true)}
       >
         Quick Capture
+      </button>
+
+      {/* Attach to Issue — dev/QA testing flow */}
+      <button
+        className="w-full py-2 px-4 rounded-lg bg-surface border border-border text-text font-medium text-sm hover:bg-surface-hover hover:border-border-hover transition-colors disabled:opacity-50"
+        onClick={() => setShowAttachToIssue(true)}
+        disabled={!recording.isRecording}
+      >
+        Attach to Issue
       </button>
 
       {/* Manual recording toggle */}

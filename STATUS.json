@@ -1,8 +1,8 @@
 {
   "project": "BugDetector",
   "version": "1.0",
-  "last_updated": "2026-04-16T01:00:00Z",
-  "last_task_completed": "T-036",
+  "last_updated": "2026-04-15T18:00:00Z",
+  "last_task_completed": "T-038",
   "total_tasks": 55,
   "completed": 55,
   "in_progress": null,
@@ -444,25 +444,25 @@
       "id": "T-037",
       "phase": "1E",
       "title": "Dev Testing Flow with Recording Attachment",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T12:00:00Z",
+      "completed_at": "2026-04-15T12:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-017", "T-030"],
-      "notes": ""
+      "notes": "AttachToIssue extension component, attach-recording + search-issues REST endpoints, testingWorkflowRouter tRPC (moveToDevTesting, markReadyForQA, getTestingTimeline). Status transition validation, notifications to reporter/QA team."
     },
     {
       "id": "T-038",
       "phase": "1E",
       "title": "QA Testing Flow with Pass/Fail and Reopen",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T17:30:00Z",
+      "completed_at": "2026-04-15T18:00:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-037"],
-      "notes": ""
+      "notes": "4 new tRPC procedures (submitQAVerdict, getQAContext, getReopenCount, getQAQueue) added to testing-workflow router. QAVerdict component with pass/fail buttons, confirmation dialog, notes, reopen count. TestingTimeline component with lifecycle stage bar and chronological activity log. PASS closes issue, FAIL reopens with notifications to reporter+assignee."
     },
     {
       "id": "T-039",
@@ -660,13 +660,13 @@
       "id": "T-055",
       "phase": "cross",
       "title": "End-to-End Smoke Test Suite",
-      "status": "pending",
-      "passes": false,
-      "started_at": null,
-      "completed_at": null,
-      "iteration_count": 0,
+      "status": "completed",
+      "passes": true,
+      "started_at": "2026-04-15T12:00:00Z",
+      "completed_at": "2026-04-15T12:30:00Z",
+      "iteration_count": 1,
       "depends_on": ["T-036", "T-038"],
-      "notes": ""
+      "notes": "15 manual smoke test cases in README.md. Playwright config + helpers + test file with 5 implemented tests (auth, company, invitation, issue, board) and 10 skipped stubs. test:e2e script added."
     }
   ]
 }

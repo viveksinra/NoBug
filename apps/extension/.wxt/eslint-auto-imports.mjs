@@ -1,5 +1,6 @@
 const globals = {
   "AnnotationEditor": true,
+  "AttachToIssue": true,
   "AutoMount": true,
   "AutoMountOptions": true,
   "Browser": true,

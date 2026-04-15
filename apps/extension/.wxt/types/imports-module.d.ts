@@ -19,6 +19,7 @@ declare module '#imports' {
   export { useState, useCallback, useMemo, useEffect, useRef, useContext, useReducer } from 'react';
   export { fakeBrowser } from 'wxt/testing';
   export { AnnotationEditor } from '../src/components/AnnotationEditor';
+  export { AttachToIssue } from '../src/components/AttachToIssue';
   export { ConsentDialog } from '../src/components/ConsentDialog';
   export { FullCapture } from '../src/components/FullCapture';
   export { FullMode } from '../src/components/FullMode';
