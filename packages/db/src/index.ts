@@ -1,4 +1,4 @@
-// @nobug/db — Prisma client singleton
+// @snagbug/db — Prisma client singleton
 // Import this in apps/web and packages/mcp-server, never instantiate PrismaClient directly.
 
 import { PrismaClient } from '@prisma/client';

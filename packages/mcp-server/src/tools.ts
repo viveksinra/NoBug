@@ -1,6 +1,6 @@
 /**
- * MCP tool definitions for NoBug bug tracking.
- * Each tool is a thin wrapper that calls the NoBug REST API.
+ * MCP tool definitions for SnagBug bug tracking.
+ * Each tool is a thin wrapper that calls the SnagBug REST API.
  */
 
 import { z } from "zod";

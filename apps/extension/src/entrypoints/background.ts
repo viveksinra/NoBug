@@ -12,7 +12,7 @@ import { processQueue, getQueueStatus, clearFailedUploads } from '@/lib/upload-q
 import type { ExtensionMessage } from '@/lib/types';
 
 /** Alarm name for periodic queue processing */
-const QUEUE_ALARM_NAME = 'nobug_process_queue';
+const QUEUE_ALARM_NAME = 'snagbug_process_queue';
 const QUEUE_ALARM_INTERVAL_MINUTES = 5;
 
 // Recording message types that should be forwarded to the active tab's content script
@@ -31,7 +31,7 @@ const CONTENT_SCRIPT_MESSAGES = new Set([
 ]);
 
 export default defineBackground(() => {
-  console.log('[NoBug] Service worker initialized');
+  console.log('[SnagBug] Service worker initialized');
 
   // Handle messages from popup and content scripts
   browser.runtime.onMessage.addListener(
@@ -43,7 +43,7 @@ export default defineBackground(() => {
 
   // When the extension is installed or updated, set up alarms and retry queue
   browser.runtime.onInstalled.addListener(async () => {
-    console.log('[NoBug] Extension installed/updated — checking auth state');
+    console.log('[SnagBug] Extension installed/updated — checking auth state');
     await refreshAuthState();
 
     // Set up periodic alarm for queue processing
@@ -51,23 +51,23 @@ export default defineBackground(() => {
 
     // Process any pending uploads from a previous session
     processQueue().catch((err) =>
-      console.warn('[NoBug] Queue processing failed on install:', err),
+      console.warn('[SnagBug] Queue processing failed on install:', err),
     );
   });
 
   // On service worker startup (e.g., after idle wake), process queue
   setupQueueAlarm().then(() => {
     processQueue().catch((err) =>
-      console.warn('[NoBug] Queue processing failed on startup:', err),
+      console.warn('[SnagBug] Queue processing failed on startup:', err),
     );
   });
 
   // Handle periodic alarm for queue retry
   browser.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === QUEUE_ALARM_NAME) {
-      console.log('[NoBug] Queue alarm fired — processing upload queue');
+      console.log('[SnagBug] Queue alarm fired — processing upload queue');
       processQueue().catch((err) =>
-        console.warn('[NoBug] Queue processing failed on alarm:', err),
+        console.warn('[SnagBug] Queue processing failed on alarm:', err),
       );
     }
   });
@@ -79,7 +79,7 @@ export default defineBackground(() => {
       tab.url?.includes('/login') &&
       tab.url?.includes('ext=1')
     ) {
-      console.log('[NoBug] Detected login page completion — refreshing auth');
+      console.log('[SnagBug] Detected login page completion — refreshing auth');
       const state = await refreshAuthState();
       browser.runtime
         .sendMessage({ type: 'AUTH_CHANGED', payload: state } satisfies ExtensionMessage)
@@ -93,9 +93,9 @@ export default defineBackground(() => {
   // Listen for network reconnect via navigator.onLine changes
   // In service workers, we use the global 'online' event
   self.addEventListener('online', () => {
-    console.log('[NoBug] Network reconnected — processing upload queue');
+    console.log('[SnagBug] Network reconnected — processing upload queue');
     processQueue().catch((err) =>
-      console.warn('[NoBug] Queue processing failed on reconnect:', err),
+      console.warn('[SnagBug] Queue processing failed on reconnect:', err),
     );
   });
 });
@@ -111,10 +111,10 @@ async function setupQueueAlarm(): Promise<void> {
       periodInMinutes: QUEUE_ALARM_INTERVAL_MINUTES,
     });
     console.log(
-      `[NoBug] Queue alarm set — every ${QUEUE_ALARM_INTERVAL_MINUTES} minutes`,
+      `[SnagBug] Queue alarm set — every ${QUEUE_ALARM_INTERVAL_MINUTES} minutes`,
     );
   } catch (err) {
-    console.warn('[NoBug] Failed to set up queue alarm:', err);
+    console.warn('[SnagBug] Failed to set up queue alarm:', err);
   }
 }
 
@@ -171,7 +171,7 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
         quality: 100,
       });
       // Store for the annotation editor to pick up
-      await browser.storage.local.set({ nobug_screenshot: dataUrl });
+      await browser.storage.local.set({ snagbug_screenshot: dataUrl });
       return { dataUrl };
     } catch (err) {
       return { error: String(err) };
@@ -267,7 +267,7 @@ async function handleMessage(message: ExtensionMessage): Promise<unknown> {
     }
 
     default:
-      console.warn('[NoBug] Unknown message type:', (message as any).type);
+      console.warn('[SnagBug] Unknown message type:', (message as any).type);
       return null;
   }
 }

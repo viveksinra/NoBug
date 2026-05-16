@@ -188,7 +188,7 @@ export default defineContentScript({
       user?: string | null,
       password?: string | null,
     ) {
-      (this as any).__nobug = {
+      (this as any).__snagbug = {
         id: nextId(),
         method: method.toUpperCase(),
         url: typeof url === 'string' ? url : url.href,
@@ -199,7 +199,7 @@ export default defineContentScript({
     };
 
     XHR.setRequestHeader = function (name: string, value: string) {
-      const meta = (this as any).__nobug;
+      const meta = (this as any).__snagbug;
       if (meta) {
         meta.requestHeaders[name] = value;
       }
@@ -207,7 +207,7 @@ export default defineContentScript({
     };
 
     XHR.send = function (body?: Document | XMLHttpRequestBodyInit | null) {
-      const meta = (this as any).__nobug;
+      const meta = (this as any).__snagbug;
       if (!meta) {
         return originalSend.call(this, body);
       }

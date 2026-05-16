@@ -1,19 +1,20 @@
 {
-  "name": "nobug",
+  "name": "snagbug",
   "private": true,
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
-    "dev:web": "turbo run dev --filter=@nobug/web",
-    "dev:ext": "turbo run dev --filter=@nobug/extension",
+    "dev:web": "turbo run dev --filter=@snagbug/web",
+    "dev:ext": "turbo run dev --filter=@snagbug/extension",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
-    "db:generate": "pnpm --filter @nobug/db generate",
-    "db:migrate": "pnpm --filter @nobug/db migrate",
-    "db:push": "pnpm --filter @nobug/db push",
-    "db:studio": "pnpm --filter @nobug/db studio"
+    "db:generate": "pnpm --filter @snagbug/db generate",
+    "db:migrate": "pnpm --filter @snagbug/db migrate",
+    "db:push": "pnpm --filter @snagbug/db push",
+    "db:studio": "pnpm --filter @snagbug/db studio",
+    "db:seed": "pnpm --filter @snagbug/web exec tsx scripts/seed.mts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

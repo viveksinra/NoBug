@@ -1,4 +1,4 @@
-# NoBug
+# SnagBug
 
 AI-native bug tracking, test management, and developer collaboration platform.
 
@@ -22,7 +22,7 @@ apps/
 packages/
   shared/       → Zod schemas, types, constants
   db/           → Prisma schema + client
-  mcp-server/   → @nobug/mcp-server (npm package)
+  mcp-server/   → @snagbug/mcp-server (npm package)
   ui/           → Shared UI components
 ```
 

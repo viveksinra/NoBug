@@ -13,7 +13,7 @@ export interface ConsentState {
 const CURRENT_CONSENT_VERSION = '1.0';
 
 const consentStorage = storage.defineItem<ConsentState | null>(
-  'local:nobug_consent',
+  'local:snagbug_consent',
   { fallback: null },
 );
 

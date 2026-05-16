@@ -7,7 +7,7 @@ import {
   PRIORITIES,
   ISSUE_TYPES,
   ACTOR_TYPES,
-} from '@nobug/shared';
+} from '@snagbug/shared';
 
 // Helper to get next issue number for a project
 async function getNextIssueNumber(

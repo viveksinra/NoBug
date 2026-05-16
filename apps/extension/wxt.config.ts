@@ -4,7 +4,7 @@ export default defineConfig({
   srcDir: 'src',
   modules: ['@wxt-dev/module-react'],
   manifest: {
-    name: 'NoBug — Bug Capture',
+    name: 'SnagBug — Bug Capture',
     description: 'Capture bugs with recording, console logs, network requests, and screenshots.',
     permissions: ['activeTab', 'storage', 'tabs', 'scripting', 'offscreen', 'alarms'],
     host_permissions: ['http://localhost:3000/*'],

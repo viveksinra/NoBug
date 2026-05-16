@@ -15,7 +15,7 @@ export default defineContentScript({
     // Check GDPR consent before starting any recording
     const consented = await hasConsent();
     if (!consented) {
-      console.log('[NoBug] No consent given — recording disabled');
+      console.log('[SnagBug] No consent given — recording disabled');
       // Still listen for messages so consent can be checked
       browser.runtime.onMessage.addListener((message, _sender, sendResponse) => {
         if (message.type === 'GET_RECORDING_STATE') {
@@ -230,6 +230,6 @@ export default defineContentScript({
     // Start rolling buffer recording immediately
     startRecording();
 
-    console.log('[NoBug] Content script loaded — rrweb recording + console capture active');
+    console.log('[SnagBug] Content script loaded — rrweb recording + console capture active');
   },
 });

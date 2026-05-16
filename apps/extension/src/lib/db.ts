@@ -35,12 +35,12 @@ export interface CaptureHistoryEntry {
 
 const MAX_HISTORY_ENTRIES = 50;
 
-class NoBugDatabase extends Dexie {
+class SnagBugDatabase extends Dexie {
   pendingUploads!: EntityTable<PendingUpload, 'id'>;
   captureHistory!: EntityTable<CaptureHistoryEntry, 'id'>;
 
   constructor() {
-    super('nobug_extension');
+    super('snagbug_extension');
 
     this.version(1).stores({
       pendingUploads: '++id, type, captureId, status, createdAt',
@@ -50,7 +50,7 @@ class NoBugDatabase extends Dexie {
 }
 
 /** Singleton database instance */
-export const extensionDb = new NoBugDatabase();
+export const extensionDb = new SnagBugDatabase();
 
 /**
  * Add a capture to history, auto-pruning to keep max 50 entries.

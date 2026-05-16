@@ -20,8 +20,8 @@ export function AnnotationEditor() {
   // Load screenshot from storage
   useEffect(() => {
     const init = async () => {
-      const stored = await browser.storage.local.get('nobug_screenshot');
-      const dataUrl = stored.nobug_screenshot as string;
+      const stored = await browser.storage.local.get('snagbug_screenshot');
+      const dataUrl = stored.snagbug_screenshot as string;
       if (!dataUrl || !canvasRef.current) return;
 
       const img = new Image();
@@ -289,8 +289,8 @@ export function AnnotationEditor() {
 
     // Store result for the popup/service worker to pick up
     await browser.storage.local.set({
-      nobug_annotated_screenshot: dataUrl,
-      nobug_annotations_json: annotationsJson,
+      snagbug_annotated_screenshot: dataUrl,
+      snagbug_annotations_json: annotationsJson,
     });
 
     // Notify and close

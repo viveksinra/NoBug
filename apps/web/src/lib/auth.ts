@@ -1,6 +1,6 @@
 import { betterAuth } from 'better-auth';
 import { prismaAdapter } from 'better-auth/adapters/prisma';
-import { db } from '@nobug/db';
+import { db } from '@snagbug/db';
 import {
   sendPasswordResetEmail,
   sendVerificationEmail,

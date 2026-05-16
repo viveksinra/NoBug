@@ -1,11 +1,11 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import { Prisma } from '@nobug/db';
+import { Prisma } from '@snagbug/db';
 import { router, protectedProcedure } from '../trpc';
 import {
   MAX_RECORDING_SIZE_BYTES,
   MAX_SCREENSHOT_SIZE_BYTES,
-} from '@nobug/shared';
+} from '@snagbug/shared';
 import {
   generateUploadUrl,
   generateDownloadUrl,

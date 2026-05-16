@@ -77,7 +77,7 @@ pnpm prisma db seed
 ### 4. Browser Extension
 - [ ] Update `apps/extension/src/lib/constants.ts` — change `APP_URL` to production URL
 - [ ] Update `apps/extension/wxt.config.ts` — change `host_permissions` to production domain
-- [ ] Build for production: `pnpm --filter @nobug/extension build`
+- [ ] Build for production: `pnpm --filter @snagbug/extension build`
 - [ ] Load in Chrome: `chrome://extensions` → Load unpacked → select `.output/chrome-mv3/`
 - [ ] (For distribution) Create Chrome Web Store developer account ($5 one-time fee)
 - [ ] (For distribution) Package and submit to Chrome Web Store
@@ -153,7 +153,7 @@ pnpm prisma db seed
 ### API & MCP
 - [ ] Generate API key from settings page
 - [ ] REST API: `GET /api/v1/bugs` with Bearer token returns issues
-- [ ] MCP server starts: `npx @nobug/mcp-server`
+- [ ] MCP server starts: `npx @snagbug/mcp-server`
 - [ ] MCP tool `list_bugs` returns results
 
 ### Settings Pages
@@ -183,7 +183,7 @@ pnpm prisma db seed
 - CloudFront CDN signed URLs for private recordings
 - AI-generated issue descriptions via Claude API
 - Chrome Web Store submission
-- Firefox extension build (`pnpm --filter @nobug/extension build:firefox`)
+- Firefox extension build (`pnpm --filter @snagbug/extension build:firefox`)
 
 ### V2 (AI Automation Testing)
 - AI-powered test generation from rrweb recordings

@@ -1,4 +1,4 @@
-import { PII_PATTERNS, PII_REPLACEMENT } from '@nobug/shared';
+import { PII_PATTERNS, PII_REPLACEMENT } from '@snagbug/shared';
 import type { ConsoleEntry } from './console-types';
 import type { NetworkEntry } from './network-types';
 

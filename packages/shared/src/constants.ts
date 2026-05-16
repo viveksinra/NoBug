@@ -1,4 +1,4 @@
-export const APP_NAME = 'NoBug';
+export const APP_NAME = 'SnagBug';
 
 // ============================================================================
 // Enums as const tuples (used for Zod enums and type inference)

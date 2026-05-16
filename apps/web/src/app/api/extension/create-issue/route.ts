@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
-import { db } from '@nobug/db';
+import { db } from '@snagbug/db';
 import { validateApiKey } from '@/server/routers/api-key';
-import { PRIORITIES } from '@nobug/shared';
+import { PRIORITIES } from '@snagbug/shared';
 
 /**
  * POST /api/extension/create-issue

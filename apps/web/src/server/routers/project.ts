@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, companyProcedure, requirePermission } from '../trpc';
-import { createProjectSchema, updateProjectSchema } from '@nobug/shared';
+import { createProjectSchema, updateProjectSchema } from '@snagbug/shared';
 
 function generateKey(name: string): string {
   return name

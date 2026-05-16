@@ -1,4 +1,4 @@
-import type { IntegrationProvider } from '@nobug/shared';
+import type { IntegrationProvider } from '@snagbug/shared';
 
 // ============================================================================
 // Integration Adapter Types
@@ -24,9 +24,9 @@ export interface IntegrationAuth {
   [key: string]: unknown;
 }
 
-/** Data structure for syncing issues between NoBug and external providers */
+/** Data structure for syncing issues between SnagBug and external providers */
 export interface IssueSyncData {
-  /** NoBug issue ID (null when pulling a new issue from external) */
+  /** SnagBug issue ID (null when pulling a new issue from external) */
   issueId?: string;
   title: string;
   description?: string;
@@ -55,7 +55,7 @@ export interface WebhookResult {
   handled: boolean;
   /** Action taken (e.g., 'issue_updated', 'status_changed', 'ignored') */
   action: string;
-  /** NoBug issue ID affected, if any */
+  /** SnagBug issue ID affected, if any */
   issueId?: string;
   /** Human-readable message */
   message?: string;
@@ -92,7 +92,7 @@ export interface IntegrationAdapter {
 
   // ─── Issue Sync ────────────────────────────────────────────────
 
-  /** Push a NoBug issue to the external provider */
+  /** Push a SnagBug issue to the external provider */
   pushIssue(issue: IssueSyncData): Promise<ExternalRef>;
 
   /** Pull an issue from the external provider by its external ID */

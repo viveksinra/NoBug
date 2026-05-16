@@ -2,9 +2,9 @@ import { initTRPC, TRPCError } from '@trpc/server';
 import superjson from 'superjson';
 import { z } from 'zod';
 import { auth } from '@/lib/auth';
-import { db } from '@nobug/db';
+import { db } from '@snagbug/db';
 import { headers } from 'next/headers';
-import { hasPermission, type Permission, type Role } from '@nobug/shared';
+import { hasPermission, type Permission, type Role } from '@snagbug/shared';
 
 export type Context = {
   db: typeof db;

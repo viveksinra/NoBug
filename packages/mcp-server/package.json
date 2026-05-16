@@ -1,7 +1,7 @@
 {
-  "name": "@nobug/mcp-server",
+  "name": "@snagbug/mcp-server",
   "version": "0.1.0",
-  "description": "NoBug MCP server — connects AI coding agents to NoBug bug tracking",
+  "description": "SnagBug MCP server — connects AI coding agents to SnagBug bug tracking",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,7 +12,7 @@
     }
   },
   "bin": {
-    "nobug-mcp": "./dist/index.js"
+    "snagbug-mcp": "./dist/index.js"
   },
   "scripts": {
     "build": "tsc",
@@ -21,13 +21,13 @@
   "keywords": [
     "mcp",
     "bug-tracking",
-    "nobug",
+    "snagbug",
     "ai-agent"
   ],
   "license": "MIT",
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
-    "@nobug/shared": "workspace:*",
+    "@snagbug/shared": "workspace:*",
     "zod": "^3.25.76"
   },
   "devDependencies": {

@@ -28,7 +28,7 @@ export function NotLoggedIn({ onLogin, onApiKeyLogin }: Props) {
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="text-center">
-        <h1 className="text-xl font-bold text-text">NoBug</h1>
+        <h1 className="text-xl font-bold text-text">SnagBug</h1>
         <p className="text-sm text-text-secondary mt-1">
           Capture bugs instantly
         </p>
@@ -53,7 +53,7 @@ export function NotLoggedIn({ onLogin, onApiKeyLogin }: Props) {
         className="w-full py-2.5 px-4 rounded-lg bg-surface border border-border text-text font-medium text-sm hover:bg-surface-hover hover:border-border-hover transition-colors"
         onClick={onLogin}
       >
-        Sign in to NoBug
+        Sign in to SnagBug
       </button>
 
       {/* API key fallback */}

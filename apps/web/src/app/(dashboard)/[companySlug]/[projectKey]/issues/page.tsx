@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ISSUE_STATUSES, PRIORITIES, PRIORITY_COLORS } from '@nobug/shared';
+import { ISSUE_STATUSES, PRIORITIES, PRIORITY_COLORS } from '@snagbug/shared';
 import Link from 'next/link';
 
 const STATUS_COLORS: Record<string, string> = {

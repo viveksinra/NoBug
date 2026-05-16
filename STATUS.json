@@ -342,7 +342,7 @@
       "completed_at": "2026-04-14T17:00:00Z",
       "iteration_count": 1,
       "depends_on": ["T-025", "T-026"],
-      "notes": "PII redaction library using @nobug/shared patterns (email, CC, SSN, phone, auth headers, JWT). Applies to console logs, network entries, rrweb text nodes. Configurable per-category toggle. GDPR consent dialog shown on first popup open. Recording blocked until consent given. Consent stored in chrome.storage.local."
+      "notes": "PII redaction library using @snagbug/shared patterns (email, CC, SSN, phone, auth headers, JWT). Applies to console logs, network entries, rrweb text nodes. Configurable per-category toggle. GDPR consent dialog shown on first popup open. Recording blocked until consent given. Consent stored in chrome.storage.local."
     },
     {
       "id": "T-029",
@@ -474,7 +474,7 @@
       "completed_at": "2026-04-15T12:30:00Z",
       "iteration_count": 1,
       "depends_on": ["T-012"],
-      "notes": "MCP server with 6 tools (list_bugs, get_bug, create_bug, update_bug, add_comment, search_bugs). Uses McpServer + StdioServerTransport from @modelcontextprotocol/sdk v1.29. ApiClient calls /api/v1/* REST endpoints with Bearer API key auth. Package executable via npx @nobug/mcp-server."
+      "notes": "MCP server with 6 tools (list_bugs, get_bug, create_bug, update_bug, add_comment, search_bugs). Uses McpServer + StdioServerTransport from @modelcontextprotocol/sdk v1.29. ApiClient calls /api/v1/* REST endpoints with Bearer API key auth. Package executable via npx @snagbug/mcp-server."
     },
     {
       "id": "T-040",

@@ -2,7 +2,7 @@ import type { NextConfig } from 'next';
 import { withSentryConfig } from '@sentry/nextjs';
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@nobug/shared', '@nobug/db', '@nobug/ui'],
+  transpilePackages: ['@snagbug/shared', '@snagbug/db', '@snagbug/ui'],
 };
 
 // Wrap with Sentry only when DSN is configured

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { randomBytes } from 'crypto';
-import type { Prisma } from '@nobug/db';
+import type { Prisma } from '@snagbug/db';
 import { router, companyProcedure, requirePermission } from '../trpc';
 import {
   sendWebhook,
@@ -215,7 +215,7 @@ export const webhookRouter = router({
       const payload = buildWebhookPayload('test.ping', {
         webhook_id: integration.id,
         company_id: ctx.company.id,
-        message: 'This is a test webhook delivery from NoBug.',
+        message: 'This is a test webhook delivery from SnagBug.',
       });
 
       const result: DeliveryResult = await sendWebhook(
@@ -289,7 +289,7 @@ export const webhookRouter = router({
 // ============================================================================
 
 export async function dispatchWebhooks(
-  db: import('@nobug/db').PrismaClient,
+  db: import('@snagbug/db').PrismaClient,
   companyId: string,
   event: string,
   data: Record<string, unknown>,

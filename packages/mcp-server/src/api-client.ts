@@ -1,5 +1,5 @@
 /**
- * HTTP client for calling the NoBug web app REST API.
+ * HTTP client for calling the SnagBug web app REST API.
  * Authenticates via API key (nb_key_ prefix) passed as Bearer token.
  */
 
@@ -30,7 +30,7 @@ export class ApiClient {
     if (!apiKey) {
       throw new Error(
         "NOBUG_API_KEY environment variable is required. " +
-          "Generate one at your NoBug dashboard under Settings > API Keys."
+          "Generate one at your SnagBug dashboard under Settings > API Keys."
       );
     }
     if (!apiKey.startsWith("nb_key_")) {
@@ -53,7 +53,7 @@ export class ApiClient {
     const headers: Record<string, string> = {
       Authorization: `Bearer ${this.apiKey}`,
       "Content-Type": "application/json",
-      "User-Agent": "@nobug/mcp-server",
+      "User-Agent": "@snagbug/mcp-server",
     };
 
     const response = await fetch(url, {

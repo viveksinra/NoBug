@@ -3,7 +3,7 @@ import type { RedactionConfig } from './pii-redaction';
 import { DEFAULT_REDACTION_CONFIG } from './pii-redaction';
 
 const redactionStorage = storage.defineItem<RedactionConfig>(
-  'local:nobug_redaction_config',
+  'local:snagbug_redaction_config',
   { fallback: DEFAULT_REDACTION_CONFIG },
 );
 

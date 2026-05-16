@@ -1,4 +1,4 @@
-// NoBug — Prisma Schema
+// SnagBug — Prisma Schema
 // Full V1 data model covering auth, organizations, issues, recordings,
 // regression testing, integrations, and AI agent support.
 

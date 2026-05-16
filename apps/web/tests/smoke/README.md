@@ -5,7 +5,7 @@ Manual smoke test checklist covering all 15 critical paths of the platform.
 Run automated tests (where implemented) with:
 
 ```bash
-pnpm --filter @nobug/web test:e2e
+pnpm --filter @snagbug/web test:e2e
 ```
 
 ---
@@ -89,7 +89,7 @@ pnpm --filter @nobug/web test:e2e
 
 ## ST-006: Extension -- Install, Authenticate, Consent Dialog
 
-**Prerequisites:** Extension built (`pnpm --filter @nobug/extension build`). Chrome or Chromium available.
+**Prerequisites:** Extension built (`pnpm --filter @snagbug/extension build`). Chrome or Chromium available.
 
 | Step | Action | Expected Result |
 |------|--------|-----------------|

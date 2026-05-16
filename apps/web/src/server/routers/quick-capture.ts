@@ -5,7 +5,7 @@ import { router, publicProcedure, protectedProcedure } from '../trpc';
 import {
   QUICK_CAPTURE_ANON_EXPIRY_HOURS,
   QUICK_CAPTURE_FREE_EXPIRY_DAYS,
-} from '@nobug/shared';
+} from '@snagbug/shared';
 
 function generateSlug(): string {
   return randomBytes(6).toString('base64url'); // 8-char URL-safe slug

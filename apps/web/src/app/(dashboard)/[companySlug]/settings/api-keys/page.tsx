@@ -284,7 +284,7 @@ export default function ApiKeysSettingsPage() {
               <p className="font-medium text-neutral-300">MCP Server Configuration</p>
               <code className="block overflow-x-auto rounded-md border border-neutral-700 bg-neutral-800 px-3 py-2 font-mono text-xs text-neutral-300">
                 {'{'}&quot;mcpServers&quot;: {'{'}&quot;bugdetector&quot;: {'{'}
-                &quot;command&quot;: &quot;npx&quot;, &quot;args&quot;: [&quot;@nobug/mcp-server&quot;],
+                &quot;command&quot;: &quot;npx&quot;, &quot;args&quot;: [&quot;@snagbug/mcp-server&quot;],
                 &quot;env&quot;: {'{'}&quot;BUGDETECTOR_API_KEY&quot;: &quot;your-api-key&quot;{'}'}{'}'}
                 {'}'}
                 {'}'}

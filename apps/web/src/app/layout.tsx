@@ -3,7 +3,7 @@ import { Providers } from '@/components/providers';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'NoBug — AI-Native Bug Tracking',
+  title: 'SnagBug — AI-Native Bug Tracking',
   description:
     'Bug tracking, test management, and AI agent integration platform with browser extension for instant bug capture.',
 };

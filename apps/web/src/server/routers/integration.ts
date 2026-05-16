@@ -1,8 +1,8 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
-import type { Prisma } from '@nobug/db';
+import type { Prisma } from '@snagbug/db';
 import { router, companyProcedure, requirePermission } from '../trpc';
-import { INTEGRATION_PROVIDERS } from '@nobug/shared';
+import { INTEGRATION_PROVIDERS } from '@snagbug/shared';
 import { getAdapter, hasAdapter, getAvailableProviders } from '../integrations';
 
 // ============================================================================

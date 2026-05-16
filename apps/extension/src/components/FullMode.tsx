@@ -35,7 +35,7 @@ export function FullMode({
           </div>
           <div className="min-w-0">
             <p className="text-sm font-semibold text-text truncate">
-              {activeCompany?.name ?? 'NoBug'}
+              {activeCompany?.name ?? 'SnagBug'}
             </p>
             <p className="text-xs text-text-muted truncate">
               {authState.user?.email}

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, companyProcedure, requirePermission } from '../trpc';
-import { REGRESSION_TIERS, ACTOR_TYPES } from '@nobug/shared';
+import { REGRESSION_TIERS, ACTOR_TYPES } from '@snagbug/shared';
 
 // ── Helpers ─────────────────────────────────────────────────────────
 

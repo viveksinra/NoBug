@@ -1,5 +1,5 @@
 {
-  "name": "@nobug/web",
+  "name": "@snagbug/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -11,9 +11,9 @@
     "test:e2e": "playwright test"
   },
   "dependencies": {
-    "@nobug/db": "workspace:*",
-    "@nobug/shared": "workspace:*",
-    "@nobug/ui": "workspace:*",
+    "@snagbug/db": "workspace:*",
+    "@snagbug/shared": "workspace:*",
+    "@snagbug/ui": "workspace:*",
     "@octokit/rest": "^22.0.1",
     "@radix-ui/react-avatar": "^1.1.11",
     "@radix-ui/react-dialog": "^1.1.15",
@@ -53,6 +53,7 @@
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
     "tailwindcss": "^4.1.4",
+    "tsx": "^4.19.2",
     "typescript": "^5.8.3"
   }
 }

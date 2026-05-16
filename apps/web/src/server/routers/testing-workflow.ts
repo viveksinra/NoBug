@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, requirePermission, companyProcedure } from '../trpc';
-import { ISSUE_STATUSES, RECORDING_TYPES } from '@nobug/shared';
+import { ISSUE_STATUSES, RECORDING_TYPES } from '@snagbug/shared';
 import { createNotification } from './notification';
 
 // Valid status transitions for testing workflow

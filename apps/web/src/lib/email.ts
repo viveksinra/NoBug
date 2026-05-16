@@ -38,7 +38,7 @@ export async function sendEmail({ to, subject, html }: SendEmailOptions) {
 export async function sendPasswordResetEmail(to: string, resetUrl: string) {
   await sendEmail({
     to,
-    subject: 'Reset your NoBug password',
+    subject: 'Reset your SnagBug password',
     html: `
 <!DOCTYPE html>
 <html>
@@ -53,7 +53,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:8px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td>
-              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#18181b;">NoBug</h1>
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#18181b;">SnagBug</h1>
               <p style="margin:0 0 24px;font-size:14px;color:#71717a;">Password Reset</p>
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f46;">
                 We received a request to reset your password. Click the button below to choose a new password.
@@ -71,7 +71,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
                 If you didn't request this, you can safely ignore this email. The link expires in 1 hour.
               </p>
               <p style="margin:24px 0 0;font-size:12px;color:#d4d4d8;border-top:1px solid #f4f4f5;padding-top:16px;">
-                NoBug &mdash; AI-native bug tracking
+                SnagBug &mdash; AI-native bug tracking
               </p>
             </td>
           </tr>
@@ -88,7 +88,7 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string) {
 export async function sendVerificationEmail(to: string, verifyUrl: string) {
   await sendEmail({
     to,
-    subject: 'Verify your NoBug email address',
+    subject: 'Verify your SnagBug email address',
     html: `
 <!DOCTYPE html>
 <html>
@@ -103,7 +103,7 @@ export async function sendVerificationEmail(to: string, verifyUrl: string) {
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:8px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td>
-              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#18181b;">NoBug</h1>
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#18181b;">SnagBug</h1>
               <p style="margin:0 0 24px;font-size:14px;color:#71717a;">Email Verification</p>
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f46;">
                 Thanks for signing up! Please verify your email address by clicking the button below.
@@ -121,7 +121,7 @@ export async function sendVerificationEmail(to: string, verifyUrl: string) {
                 If you didn't create an account, you can safely ignore this email.
               </p>
               <p style="margin:24px 0 0;font-size:12px;color:#d4d4d8;border-top:1px solid #f4f4f5;padding-top:16px;">
-                NoBug &mdash; AI-native bug tracking
+                SnagBug &mdash; AI-native bug tracking
               </p>
             </td>
           </tr>
@@ -143,7 +143,7 @@ export async function sendInvitationEmail(
 ) {
   await sendEmail({
     to,
-    subject: `You've been invited to join ${companyName} on NoBug`,
+    subject: `You've been invited to join ${companyName} on SnagBug`,
     html: `
 <!DOCTYPE html>
 <html>
@@ -158,10 +158,10 @@ export async function sendInvitationEmail(
         <table width="100%" cellpadding="0" cellspacing="0" style="max-width:480px;background:#ffffff;border-radius:8px;padding:40px;box-shadow:0 1px 3px rgba(0,0,0,0.1);">
           <tr>
             <td>
-              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#18181b;">NoBug</h1>
+              <h1 style="margin:0 0 8px;font-size:22px;font-weight:700;color:#18181b;">SnagBug</h1>
               <p style="margin:0 0 24px;font-size:14px;color:#71717a;">Team Invitation</p>
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f46;">
-                <strong>${inviterName}</strong> has invited you to join <strong>${companyName}</strong> on NoBug.
+                <strong>${inviterName}</strong> has invited you to join <strong>${companyName}</strong> on SnagBug.
               </p>
               <p style="margin:0 0 16px;font-size:15px;line-height:1.6;color:#3f3f46;">
                 Click the button below to accept the invitation and join the team.
@@ -179,7 +179,7 @@ export async function sendInvitationEmail(
                 If you don't recognize this invitation, you can safely ignore this email. The link expires in 7 days.
               </p>
               <p style="margin:24px 0 0;font-size:12px;color:#d4d4d8;border-top:1px solid #f4f4f5;padding-top:16px;">
-                NoBug &mdash; AI-native bug tracking
+                SnagBug &mdash; AI-native bug tracking
               </p>
             </td>
           </tr>

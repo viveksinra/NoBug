@@ -10,13 +10,13 @@
 > Consolidate reusable patterns here. Read this section FIRST before starting any task.
 > These patterns apply across the entire codebase.
 
-- Package scope is `@nobug/` (not `@bugdetector/`) — all workspace packages use this prefix
-- Prisma client is imported from `@nobug/db` via `import { db } from '@nobug/db'` — singleton pattern in `packages/db/src/index.ts`
+- Package scope is `@snagbug/` (not `@bugdetector/`) — all workspace packages use this prefix
+- Prisma client is imported from `@snagbug/db` via `import { db } from '@snagbug/db'` — singleton pattern in `packages/db/src/index.ts`
 - Better Auth manages User, Session, Account, Verification tables — password is stored in `Account` table, not `User`
 - Better Auth field mappings: use snake_case in Prisma, map to camelCase in `auth.ts` config
 - tRPC routers in `apps/web/src/server/routers/` — one file per domain, combined in `_app.ts`
 - `protectedProcedure` in `apps/web/src/server/trpc.ts` enforces auth — provides `ctx.user` and `ctx.session`
-- Zod schemas from `@nobug/shared` — never duplicate validation between web app and extension
+- Zod schemas from `@snagbug/shared` — never duplicate validation between web app and extension
 - WXT extension requires `srcDir: 'src'` in wxt.config.ts when using `src/entrypoints/` directory structure
 - API keys use `nb_key_` prefix + SHA-256 hash storage; `validateApiKey()` in `api-key.ts` for REST/MCP auth
 - `requirePermission('perm')` factory in trpc.ts chains off companyProcedure — use for write operations
@@ -63,7 +63,7 @@
 - Verified `pnpm turbo build` succeeds across all 6 workspaces
 
 **Learnings:**
-- Package scope is @nobug/ (not @bugdetector/ as CLAUDE.md suggests) — follow existing convention
+- Package scope is @snagbug/ (not @bugdetector/ as CLAUDE.md suggests) — follow existing convention
 - WXT requires `srcDir: 'src'` when entrypoints are under src/entrypoints/
 - WXT outputs to .output/ directory, needs to be in turbo.json outputs
 
@@ -179,7 +179,7 @@
 - Scoped permissions: read/write, per-project or company-wide
 
 **Learnings:**
-- API key prefix changed from `bd_key_` to `nb_key_` to match NoBug branding
+- API key prefix changed from `bd_key_` to `nb_key_` to match SnagBug branding
 - validateApiKey is exported as a standalone utility (not a tRPC middleware) so it can be used by non-tRPC routes (REST, MCP SSE endpoint)
 
 ---
@@ -344,7 +344,7 @@
 - CAPTURE_BUFFER now returns rrweb events + consoleLogs + networkLogs
 
 **Learnings:**
-- XHR patching requires storing metadata on the instance (__nobug) across open/send lifecycle
+- XHR patching requires storing metadata on the instance (__snagbug) across open/send lifecycle
 - fetch() clone not needed for headers — response.headers is readable without consuming body
 - Both fetch errors (network failures) and 4xx/5xx responses are flagged as failed
 
@@ -393,7 +393,7 @@
 - apps/extension/src/lib/types.ts (modified — added consent/redaction message types)
 
 **What Was Implemented:**
-- PII redaction library using @nobug/shared PII_PATTERNS (email, CC, SSN, phone, auth headers, JWT)
+- PII redaction library using @snagbug/shared PII_PATTERNS (email, CC, SSN, phone, auth headers, JWT)
 - Applies to: console logs (message, args, stack), network entries (headers, URL, bodies), rrweb text nodes
 - Per-category toggle config stored in chrome.storage.local
 - Custom regex patterns support for company-specific redaction
@@ -505,7 +505,7 @@
 - `ApiClient` class that reads `NOBUG_API_KEY` (nb_key_ prefix) and `NOBUG_API_URL` from env vars
 - All 6 bug tools registered via `registerTool()` with Zod input schemas and detailed AI-friendly descriptions
 - Tools call `/api/v1/*` REST endpoints (to be implemented in T-041)
-- Package is executable via `npx @nobug/mcp-server` with shebang in dist/index.js
+- Package is executable via `npx @snagbug/mcp-server` with shebang in dist/index.js
 - Exports `createServer()` and `startServer()` for programmatic use
 
 **Learnings:**
@@ -526,7 +526,7 @@
 - `apps/web/src/app/api/v1/bugs/[id]/comments/route.ts` — POST (add comment)
 
 **What was implemented:**
-- 6 REST API endpoints that the MCP server package (`@nobug/mcp-server`) calls via its ApiClient
+- 6 REST API endpoints that the MCP server package (`@snagbug/mcp-server`) calls via its ApiClient
 - All routes authenticate via `Authorization: Bearer nb_key_...` header using existing `validateApiKey`
 - Company-scoped queries — API key provides `company_id`, optionally `project_id`
 - Write operations check `permissions.write` on the API key
@@ -612,7 +612,7 @@
 
 **Learnings:**
 - Prisma JSON fields need `as Prisma.InputJsonValue` cast when receiving `z.record(z.unknown())` input
-- Import `Prisma` type from `@nobug/db` (not `@prisma/client`) since the db package re-exports everything
+- Import `Prisma` type from `@snagbug/db` (not `@prisma/client`) since the db package re-exports everything
 - Did NOT modify `_app.ts` per task instructions — router must be wired up separately
 
 ---
@@ -665,7 +665,7 @@
 - Global error boundary reports unhandled errors to Sentry and shows user-friendly reset UI
 - next.config.ts conditionally wraps with withSentryConfig only when DSN is set
 - Source map upload disabled when SENTRY_AUTH_TOKEN is not set
-- Build verified passing with `pnpm turbo build --filter=@nobug/web`
+- Build verified passing with `pnpm turbo build --filter=@snagbug/web`
 
 **Learnings:**
 - @sentry/nextjs withSentryConfig can be conditionally applied — check env var at config time
@@ -813,7 +813,7 @@
 - STATUS.json (updated)
 
 **What was implemented:**
-- `webhook-sender.ts`: `sendWebhook()` with HMAC-SHA256 signature in `X-NoBug-Signature` header, 3 retries with exponential backoff (1s/5s/30s), 10s timeout per attempt, delivery attempt logging
+- `webhook-sender.ts`: `sendWebhook()` with HMAC-SHA256 signature in `X-SnagBug-Signature` header, 3 retries with exponential backoff (1s/5s/30s), 10s timeout per attempt, delivery attempt logging
 - `webhookRouter`: create (generates `whsec_` secret), list, update (url/events/enabled), delete, test (sends test.ping), listDeliveries (last 50 deliveries stored in config_json)
 - Webhook config stored in Integration model with provider=WEBHOOK, config_json holds url/secret/events/enabled/deliveries
 - `dispatchWebhooks()` exported helper: fire-and-forget delivery to all subscribed webhooks for a company+event
@@ -842,7 +842,7 @@
 - `generateDownloadUrl()` creates presigned GET URLs (1 hour expiry)
 - `getPublicUrl()` for Quick Capture viewer (public-read pattern)
 - `buildObjectKey()` creates S3 keys: `{env}/{companyId}/{type}/{fileId}.{ext}` (with `.gz` suffix for gzip types)
-- tRPC `upload.requestUploadUrl` validates size limits from @nobug/shared, generates presigned URL + download URL
+- tRPC `upload.requestUploadUrl` validates size limits from @snagbug/shared, generates presigned URL + download URL
 - tRPC `upload.confirmUpload` creates Recording/Screenshot DB records, updates QuickCapture URLs for console/network logs
 - tRPC `upload.getDownloadUrl` returns fresh presigned download URL
 - REST POST `/api/extension/upload` mirrors requestUploadUrl with session cookie + API key auth
@@ -871,7 +871,7 @@
 - apps/extension/package.json (added dexie dependency)
 
 **What was implemented:**
-- Dexie.js IndexedDB database `nobug_extension` with two tables:
+- Dexie.js IndexedDB database `snagbug_extension` with two tables:
   - `pendingUploads`: id, type, data, captureId, createdAt, retryCount, lastRetryAt, status — indexed by status and captureId
   - `captureHistory`: id, slug, title, shareUrl, screenshotThumb, createdAt, type — auto-prunes to 50 entries
 - Upload queue (`upload-queue.ts`) with:

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, protectedProcedure } from '../trpc';
-import { createCompanySchema, updateCompanySchema } from '@nobug/shared';
+import { createCompanySchema, updateCompanySchema } from '@snagbug/shared';
 
 function slugify(name: string): string {
   return name

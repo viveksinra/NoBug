@@ -7,7 +7,7 @@
  * - Anonymization of old closed issues
  */
 
-import type { PrismaClient } from '@nobug/db';
+import type { PrismaClient } from '@snagbug/db';
 
 /**
  * Delete QuickCaptures that have passed their expires_at timestamp.

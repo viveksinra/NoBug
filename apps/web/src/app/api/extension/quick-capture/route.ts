@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { randomBytes, createHash } from 'crypto';
 import { auth } from '@/lib/auth';
-import { db } from '@nobug/db';
+import { db } from '@snagbug/db';
 import {
   QUICK_CAPTURE_ANON_EXPIRY_HOURS,
   QUICK_CAPTURE_FREE_EXPIRY_DAYS,
-} from '@nobug/shared';
+} from '@snagbug/shared';
 
 function generateSlug(): string {
   return randomBytes(6).toString('base64url');

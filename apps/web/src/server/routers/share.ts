@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { createHash } from 'crypto';
 import { router, protectedProcedure, requirePermission } from '../trpc';
-import { PRIORITIES, ISSUE_TYPES } from '@nobug/shared';
+import { PRIORITIES, ISSUE_TYPES } from '@snagbug/shared';
 
 function hashPassword(password: string): string {
   return createHash('sha256').update(password).digest('hex');

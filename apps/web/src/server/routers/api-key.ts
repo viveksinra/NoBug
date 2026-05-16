@@ -111,7 +111,7 @@ export const apiKeyRouter = router({
 // Utility: validate an API key from a raw Bearer token
 // Used by REST API routes and MCP endpoint
 export async function validateApiKey(
-  db: typeof import('@nobug/db').db,
+  db: typeof import('@snagbug/db').db,
   rawKey: string,
 ): Promise<{
   apiKey: { id: string; company_id: string; project_id: string | null; permissions: unknown };

@@ -15,7 +15,7 @@ export function NoCompany({ authState, onLogout }: Props) {
     <div className="flex flex-col gap-4 p-4">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-lg font-bold text-text">NoBug</h1>
+          <h1 className="text-lg font-bold text-text">SnagBug</h1>
           <p className="text-xs text-text-secondary truncate max-w-[200px]">
             {authState.user?.email}
           </p>

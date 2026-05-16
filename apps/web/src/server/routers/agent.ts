@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, companyProcedure, requirePermission } from '../trpc';
-import { AGENT_TYPES, AGENT_STATUSES } from '@nobug/shared';
+import { AGENT_TYPES, AGENT_STATUSES } from '@snagbug/shared';
 
 const createAgentInput = z.object({
   name: z.string().min(1).max(100),

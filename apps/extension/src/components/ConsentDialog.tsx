@@ -9,13 +9,13 @@ export function ConsentDialog({ onAccept, onDecline }: Props) {
   return (
     <div className="flex flex-col gap-4 p-4">
       <div className="text-center">
-        <h1 className="text-xl font-bold text-text">NoBug</h1>
+        <h1 className="text-xl font-bold text-text">SnagBug</h1>
         <p className="text-sm text-text-secondary mt-1">Recording Consent</p>
       </div>
 
       <div className="bg-surface border border-border rounded-lg p-3 text-xs text-text-secondary leading-relaxed space-y-2">
         <p>
-          NoBug records browsing activity to help capture and reproduce bugs. This includes:
+          SnagBug records browsing activity to help capture and reproduce bugs. This includes:
         </p>
         <ul className="list-disc pl-4 space-y-1">
           <li>DOM interactions (mouse clicks, scrolls, input)</li>

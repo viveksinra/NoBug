@@ -3,7 +3,7 @@
 import { useParams } from 'next/navigation';
 import { trpc } from '@/lib/trpc';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ISSUE_STATUS_DISPLAY_ORDER, PRIORITY_COLORS } from '@nobug/shared';
+import { ISSUE_STATUS_DISPLAY_ORDER, PRIORITY_COLORS } from '@snagbug/shared';
 import Link from 'next/link';
 
 const STATUS_LABELS: Record<string, string> = {

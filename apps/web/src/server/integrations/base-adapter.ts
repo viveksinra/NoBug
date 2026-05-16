@@ -1,4 +1,4 @@
-import type { IntegrationProvider } from '@nobug/shared';
+import type { IntegrationProvider } from '@snagbug/shared';
 import type {
   IntegrationAdapter,
   IntegrationConfig,

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { trpc } from '@/lib/trpc';
-import { PRIORITIES, ISSUE_TYPES } from '@nobug/shared';
+import { PRIORITIES, ISSUE_TYPES } from '@snagbug/shared';
 
 // ---------------------------------------------------------------------------
 // Types

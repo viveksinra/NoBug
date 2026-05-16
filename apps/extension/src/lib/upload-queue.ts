@@ -92,7 +92,7 @@ export async function processQueue(): Promise<void> {
             lastRetryAt: new Date(),
           });
           console.warn(
-            `[NoBug] Upload ${item.id} permanently failed after ${MAX_RETRIES} retries`,
+            `[SnagBug] Upload ${item.id} permanently failed after ${MAX_RETRIES} retries`,
             err,
           );
         } else {
@@ -103,7 +103,7 @@ export async function processQueue(): Promise<void> {
             lastRetryAt: new Date(),
           });
           console.warn(
-            `[NoBug] Upload ${item.id} failed (attempt ${newRetryCount}/${MAX_RETRIES})`,
+            `[SnagBug] Upload ${item.id} failed (attempt ${newRetryCount}/${MAX_RETRIES})`,
             err,
           );
         }
@@ -194,7 +194,7 @@ async function performUpload(
   }
 
   const baseUrl =
-    (await browser.storage.local.get('nobug_api_base_url')).nobug_api_base_url ||
+    (await browser.storage.local.get('snagbug_api_base_url')).snagbug_api_base_url ||
     'http://localhost:3000';
 
   // Request a presigned upload URL from the server

@@ -107,7 +107,7 @@ test.describe.serial('BugDetector V1 Smoke Tests', () => {
   // =========================================================================
   test('ST-006: homepage loads', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByText('NoBug')).toBeVisible();
+    await expect(page.getByText('SnagBug')).toBeVisible();
   });
 
   // =========================================================================

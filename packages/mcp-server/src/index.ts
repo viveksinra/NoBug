@@ -1,27 +1,27 @@
 #!/usr/bin/env node
 
 /**
- * @nobug/mcp-server — MCP server for AI coding agents to interact with NoBug bug tracking.
+ * @snagbug/mcp-server — MCP server for AI coding agents to interact with SnagBug bug tracking.
  *
  * This is a thin client that translates MCP tool calls into HTTP API calls
- * to the NoBug backend. All business logic lives on the backend, not here.
+ * to the SnagBug backend. All business logic lives on the backend, not here.
  *
  * Configuration:
  *   NOBUG_API_KEY  — API key with nb_key_ prefix (required)
- *   NOBUG_API_URL  — Base URL of the NoBug web app (default: http://localhost:3000)
+ *   NOBUG_API_URL  — Base URL of the SnagBug web app (default: http://localhost:3000)
  *
  * Usage:
- *   npx @nobug/mcp-server
+ *   npx @snagbug/mcp-server
  *
  * Claude Desktop config (~/.claude/claude_desktop_config.json):
  *   {
  *     "mcpServers": {
- *       "nobug": {
+ *       "snagbug": {
  *         "command": "npx",
- *         "args": ["@nobug/mcp-server"],
+ *         "args": ["@snagbug/mcp-server"],
  *         "env": {
  *           "NOBUG_API_KEY": "nb_key_your_key_here",
- *           "NOBUG_API_URL": "https://your-nobug-instance.com"
+ *           "NOBUG_API_URL": "https://your-snagbug-instance.com"
  *         }
  *       }
  *     }
@@ -42,7 +42,7 @@ export function createServer(): McpServer {
 
   const server = new McpServer(
     {
-      name: "@nobug/mcp-server",
+      name: "@snagbug/mcp-server",
       version: "0.1.0",
     },
     {
@@ -50,7 +50,7 @@ export function createServer(): McpServer {
         tools: {},
       },
       instructions:
-        "NoBug MCP Server — interact with the NoBug bug tracking platform. " +
+        "SnagBug MCP Server — interact with the SnagBug bug tracking platform. " +
         "Use these tools to list, search, create, update bugs, and add comments. " +
         "All operations require a valid API key configured via NOBUG_API_KEY.",
     }
@@ -77,11 +77,11 @@ const isDirectExecution =
   process.argv[1] &&
   (process.argv[1].endsWith("mcp-server/dist/index.js") ||
     process.argv[1].endsWith("mcp-server\\dist\\index.js") ||
-    process.argv[1].includes("@nobug/mcp-server"));
+    process.argv[1].includes("@snagbug/mcp-server"));
 
 if (isDirectExecution) {
   startServer().catch((error) => {
-    console.error("Failed to start NoBug MCP server:", error);
+    console.error("Failed to start SnagBug MCP server:", error);
     process.exit(1);
   });
 }

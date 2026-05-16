@@ -1,5 +1,5 @@
 {
-  "name": "@nobug/extension",
+  "name": "@snagbug/extension",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@nobug/shared": "workspace:*",
+    "@snagbug/shared": "workspace:*",
     "dexie": "^4.4.2",
     "fabric": "^7.2.0",
     "react": "^19.1.0",

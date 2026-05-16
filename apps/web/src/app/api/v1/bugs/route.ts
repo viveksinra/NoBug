@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@nobug/db';
+import { db } from '@snagbug/db';
 import { validateApiKey } from '@/server/routers/api-key';
 
 // Helper: extract and validate API key from Authorization header

@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { randomBytes } from 'crypto';
 import { TRPCError } from '@trpc/server';
 import { router, protectedProcedure, companyProcedure, requirePermission } from '../trpc';
-import { ROLES } from '@nobug/shared';
+import { ROLES } from '@snagbug/shared';
 import { sendInvitationEmail } from '@/lib/email';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';

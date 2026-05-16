@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { TRPCError } from '@trpc/server';
 import { router, companyProcedure, requirePermission } from '../trpc';
-import { REGRESSION_TIERS, PRIORITIES } from '@nobug/shared';
+import { REGRESSION_TIERS, PRIORITIES } from '@snagbug/shared';
 
 export const regressionRouter = router({
   // ─── Suite CRUD ──────────────────────────────────────────────

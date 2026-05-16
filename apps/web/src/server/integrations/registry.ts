@@ -1,4 +1,4 @@
-import type { IntegrationProvider } from '@nobug/shared';
+import type { IntegrationProvider } from '@snagbug/shared';
 import type { IntegrationAdapter } from './types';
 import { GitHubAdapter } from './adapters/github';
 import { JiraAdapter } from './adapters/jira';
